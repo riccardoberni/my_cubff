@@ -2,3 +2,8 @@ bin
 *.swp
 build/
 experimentlogs/*
+__pycache__/
+checkpoint.dat
+checkpoint.dat.idx
+logs/
+slurm-*.out
