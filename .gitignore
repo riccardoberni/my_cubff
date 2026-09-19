@@ -5,3 +5,5 @@ logs/
 replicators/
 bin/
 build/
+experimentlogs/*
+slurm-*.out
