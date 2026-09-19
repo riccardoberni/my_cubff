@@ -494,6 +494,21 @@ def build_arg_parser() -> argparse.ArgumentParser:
                     help="high_order_entropy threshold used to detect the "
                          "state transition; defaults to the paper's own "
                          "criterion (see paper_constants.py)")
+    p.add_argument("--seed-replicator", type=str, default=None,
+                    help="path to a raw binary file containing a "
+                         "hand-crafted (or previously extracted) "
+                         "replicator to place at a random position on the "
+                         "tape before the run starts, instead of leaving "
+                         "the whole tape pure noise. Mirrors the paper's "
+                         "own viability check in Section 2.4: 'their "
+                         "viability was verified by running an experiment "
+                         "where the long-tape was seeded with a "
+                         "hand-crafted replicator'. The file can be any "
+                         "length up to --tape-size; a 64-byte file "
+                         "extracted by soup_inspector.py works too, "
+                         "though it was validated for the fixed-tape BFF "
+                         "engine and is not guaranteed to loop correctly "
+                         "here.")
     return p
 
 
@@ -506,6 +521,15 @@ def main(argv: Optional[List[str]] = None) -> None:
         else None
     )
 
+    seed_replicator = None
+    if args.seed_replicator:
+        with open(args.seed_replicator, "rb") as f:
+            seed_replicator = f.read()
+        print(
+            f"[info] seeding tape with a {len(seed_replicator)}-byte "
+            f"replicator from '{args.seed_replicator}' at a random position"
+        )
+
     config = SimConfig(
         tape_size=args.tape_size,
         head1_offset=args.head1_offset,
@@ -517,9 +541,10 @@ def main(argv: Optional[List[str]] = None) -> None:
         jsonl_path=args.jsonl_out,
         plot_path=args.plot_png,
         entropy_threshold=args.entropy_threshold,
+        seed_replicator=seed_replicator,
     )
     run_simulation(config)
 
 
 if __name__ == "__main__":
-    main()
+    main()  
