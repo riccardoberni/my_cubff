@@ -1,4 +1,7 @@
-bin
-*.swp
+__pycache__/
+checkpoint.dat
+checkpoint.dat.idx
+logs/
+replicators/
+bin/
 build/
-experimentlogs/*

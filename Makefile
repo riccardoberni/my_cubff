@@ -13,12 +13,12 @@ COMMON_FLAGS := -g -std=c++17 -O3 \
 								$(shell pkg-config --cflags libbrotlienc libbrotlicommon) \
 								${EXTRA_LDFLAGS}
 
-LINK_FLAGS := $(shell pkg-config --libs libbrotlienc libbrotlicommon)
+LINK_FLAGS := $(shell pkg-config --libs libbrotlienc libbrotlicommon | sed 's/-R/-Xlinker -rpath -Xlinker /g')
 
 
 ifeq (${CUDA}, 1)
 CUDA_PATH := $(shell which nvcc | xargs realpath | xargs dirname | xargs dirname)
-FLAGS := ${COMMON_FLAGS} -arch sm_75 --compiler-options -Wall,-fPIC \
+FLAGS := ${COMMON_FLAGS} -arch sm_70 --compiler-options -Wall,-fPIC \
 					--compiler-bindir $(shell which ${CXX}) \
 					-I ${CUDA_PATH}/include -L ${CUDA_PATH}/lib
 COMPILE_FLAGS := ${FLAGS}
