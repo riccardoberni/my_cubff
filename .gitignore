@@ -1,9 +1,9 @@
-bin
-*.swp
-build/
-experimentlogs/*
 __pycache__/
 logs/
+replicators/
+bin/
+build/
+experimentlogs/*
 slurm-*.out
 
 # soup_inspector.py / reseed_and_track.py simulation state:
