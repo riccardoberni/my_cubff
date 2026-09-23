@@ -210,7 +210,7 @@ def load_records_from_jsonl(path: str) -> list:
 
 
 # --------------------------------------------------------------------------
-# Rilevazione della transizione di stato (come in Figura 1 del paper)
+# State transition detection (as in Figure 1 of the paper)
 # --------------------------------------------------------------------------
 
 
@@ -277,7 +277,7 @@ def plot_run(
     abbia una chiave con nome `x_key`.
     """
     if not records:
-        raise ValueError("Nessun record da plottare: la lista e' vuota.")
+        raise ValueError("No records to plot: the list is empty.")
 
     epochs = [r[x_key] for r in records]
     transition_epoch = detect_transition_epoch(records, entropy_threshold, x_key=x_key)
@@ -293,27 +293,27 @@ def plot_run(
     if n_panels == 1:
         axes = [axes]
 
-    # Pannello 1: complessita'
+    # Panel 1: complexity
     ax = axes[0]
     ax.plot(epochs, [r["higher_entropy"] for r in records], label="high-order entropy", color="crimson")
     ax.plot(epochs, [r["h0"] for r in records], label="Shannon entropy (h0)", color="steelblue", alpha=0.7)
-    ax.set_ylabel("bit / carattere")
-    ax.set_title(title or "Evoluzione della run")
+    ax.set_ylabel("bits / byte")
+    ax.set_title(title or "Run evolution")
     ax.legend(loc="best", fontsize=8)
 
-    # Pannello 2: concentrazione del soup (proxy normalizzato di "unique tokens")
+    # Panel 2: soup concentration (normalized proxy for "unique tokens")
     ax = axes[1]
-    ax.plot(epochs, [r["top1_freq"] for r in records], label="frequenza token piu' comune", color="darkorange")
-    ax.plot(epochs, [r["top16_freq"] for r in records], label="frequenza top-16 token", color="olive", alpha=0.8)
-    ax.set_ylabel("frazione del soup")
+    ax.plot(epochs, [r["top1_freq"] for r in records], label="most common token frequency", color="darkorange")
+    ax.plot(epochs, [r["top16_freq"] for r in records], label="top-16 token frequency", color="olive", alpha=0.8)
+    ax.set_ylabel("fraction of soup")
     ax.set_ylim(0, 1.02)
     ax.legend(loc="best", fontsize=8)
 
-    # Pannello 3 (opzionale): frazione di self-replicatori
+    # Panel 3 (optional): fraction of self-replicators
     if has_selfrep:
         ax = axes[2]
-        ax.plot(epochs, [r["frac_selfrep"] for r in records], label="frazione self-replicatori", color="seagreen")
-        ax.set_ylabel("frazione del soup")
+        ax.plot(epochs, [r["frac_selfrep"] for r in records], label="self-replicator fraction", color="seagreen")
+        ax.set_ylabel("fraction of soup")
         ax.set_ylim(0, 1.02)
         ax.legend(loc="best", fontsize=8)
 
@@ -325,7 +325,7 @@ def plot_run(
 
     if transition_epoch is not None:
         axes[0].annotate(
-            f"transizione ~{x_label} {transition_epoch}",
+            f"transition ~{x_label} {transition_epoch}",
             xy=(transition_epoch, axes[0].get_ylim()[1]),
             xytext=(5, -10),
             textcoords="offset points",
@@ -397,7 +397,7 @@ def plot_runs(
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(metric)
-    ax.set_title(f"Confronto fra run: {metric}")
+    ax.set_title(f"Run comparison: {metric}")
     if log_x:
         ax.set_xscale("log")
     ax.legend(loc="best", fontsize=8)

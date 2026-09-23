@@ -3,7 +3,13 @@ bin
 build/
 experimentlogs/*
 __pycache__/
-checkpoint.dat
-checkpoint.dat.idx
 logs/
 slurm-*.out
+
+# soup_inspector.py / reseed_and_track.py simulation state:
+# large (up to ~8 MB per checkpoint with 131072 programs), regenerable,
+# not meant to be versioned. Replicators (soup_inspector_results/replicators/,
+# 64 bytes each) and metrics/plots ARE meant to be versioned, so they are
+# NOT ignored here.
+soup_inspector_results/checkpoints/
+_run_*.dat

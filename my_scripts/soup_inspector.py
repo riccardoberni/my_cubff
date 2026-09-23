@@ -3,14 +3,14 @@
 """
 soup_inspector.py
 
-Two-phase wrapper around the cubff Python bindings that finds a
-self-replicator in a large soup and then follows it in detail, while
+Wrapper around the cubff Python bindings that finds a
+self-replicator in a large soup and checks that it is a real one, while
 keeping the expensive per-program self-replication check
 (SimulationParams.eval_selfrep, which re-tests EVERY program in the
 soup, every epoch it is on) off almost all of the time.
 
-Why two phases
---------------
+Why the search is cheap
+-----------------------
 With a soup of size --num-programs (e.g. 131072), turning eval_selfrep
 on for the whole run is very expensive: the engine re-runs the
 self-replication test (13 noise trials per program) for ALL programs,
@@ -18,10 +18,11 @@ every single epoch, regardless of whether anything interesting is
 happening. Toggling it on/off at runtime mid-simulation also turned
 out to be unsafe in practice (observed corrupted scores and hangs).
 
-So instead we split the work into two separate processes, each with
-eval_selfrep fixed for its entire run (set once, never touched again):
+So instead the search runs on its own, and following the replicator
+afterwards is done by a separate process (reseed_and_track.py
+--from-checkpoint):
 
-  --phase search (cheap):
+  Search (cheap):
       Runs with eval_selfrep permanently OFF. Only watches the soup's
       aggregate higher-order entropy (the same criterion the paper
       itself uses for its "state transition" experiments,
@@ -40,39 +41,76 @@ eval_selfrep fixed for its entire run (set once, never touched again):
            confirmation, it is discarded silently (no save, no
            checkpoint) and the run goes back on its own to the cheap
            entropy-only search, ready to catch a later rise;
-        4) once confirmed, the replicator's raw bytes are saved to
-           --save-dir, a checkpoint of the whole soup is saved via the
-           engine's own save/load mechanism (--checkpoint), and the
-           confirmed program's index is saved alongside it
-           (--checkpoint + ".idx"), then the process stops.
+        4) once confirmed, the replicator's raw bytes and a checkpoint of
+           the whole soup (via the engine's own save/load mechanism) are
+           saved under --results-dir, in two subfolders ("replicators/"
+           and "checkpoints/"), sharing one identifier so the two files
+           belonging to the same replicator can be told apart from those
+           of any other run or any other confirmed replicator. The
+           confirmed program's index is saved alongside the checkpoint
+           (<checkpoint>.idx). A small JSON metadata file, with the same
+           identifier, records every run parameter that can affect
+           whether the same --seed reproduces the same result (see
+           "Where things are saved" below), then the process stops.
 
-  --phase track (precise):
-      A separate process. eval_selfrep is fixed OFF for the whole run
-      (we don't need it: we already know which program is the
-      replicator from --checkpoint + ".idx"). It reloads the checkpoint
-      soup via the engine's own --load-from mechanism and, from there,
-      shows every epoch how the known replicator interacts with
-      whichever program it gets paired with (same before/after format
-      as earlier versions of this script). The replicator's own score
-      is only recomputed, via the cheap single-program EvalParsedSelfrep
-      call, on epochs where something is actually being printed - never
-      as a full-soup pass.
+Where things are saved
+-----------------------
+By default, everything lands under --results-dir (default:
+"soup_inspector_results/"):
+
+    soup_inspector_results/
+      replicators/
+        replicator_<id>.bin              (the 64 raw bytes; only if --save)
+        replicator_<id>.json             (run parameters; only if --save)
+      checkpoints/
+        checkpoint_<id>.dat              (the whole soup at save time)
+        checkpoint_<id>.dat.idx          (index of the replicator in it)
+        checkpoint_<id>.dat.json         (run parameters, always written,
+                                           a copy of the one above)
+
+where <id> encodes the timestamp, seed, epoch and score, so the replicator,
+its checkpoint and its metadata can be paired by name even after many runs.
+--checkpoint overrides the checkpoint's path (and its ".idx" sidecar) if a
+fixed, non-generated location is preferred; it does not affect where the
+replicator's raw bytes and metadata are saved.
+
+<id> alone is NOT enough to tell whether two runs with the same --seed are
+directly comparable: the same seed only reproduces the same soup and the
+same result if every other parameter that consumes random numbers or
+changes what counts as "confirmed" also matches (--num-programs,
+--mutation-prob, --no-permute, --threshold, --confirm-epochs, --lang). The
+JSON metadata file records exactly these, plus the number of the confirmed
+program in the soup and the git commit of this script if available, so two
+saved replicators can be compared properly instead of only by --seed.
+
+Following the replicator
+------------------------
+Once the replicator is confirmed, the checkpoint and the index file are
+used by reseed_and_track.py, which reloads that exact soup and shows every
+epoch how the replicator interacts with the program it gets paired with:
+
+    python3 -u reseed_and_track.py \\
+        --from-checkpoint soup_inspector_results/checkpoints/checkpoint_<id>.dat \\
+        --epochs 2000 --print-interval 1
+
+Passing --then-track N to this script launches that command automatically
+(as a separate process, for N epochs) right after the replicator has been
+saved, with the correct, auto-generated checkpoint path already filled in.
 
 Typical usage (from the cubff/cubff folder, after building with
 PYTHON=1):
 
     python3 -u soup_inspector.py --lang bff_noheads --num-programs 131072 \\
-        --max-epochs 16000 --seed 128 --phase search --checkpoint checkpoint.dat
-
-    python3 -u soup_inspector.py --lang bff_noheads --num-programs 131072 \\
-        --max-epochs 16000 --seed 128 --phase track --checkpoint checkpoint.dat
+        --max-epochs 16000 --seed 128 --checkpoint checkpoint.dat
 """
 
 import argparse
+import json
 import os
 import struct
+import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 if _THIS_DIR not in sys.path:
@@ -114,78 +152,6 @@ KSINGLE_TAPE_SIZE = 64  # must match kSingleTapeSize in common.h
 DEFAULT_THRESHOLD = getattr(cubff, "kSelfrepThreshold", 5)
 SCORE_SCALE = KSINGLE_TAPE_SIZE  # 64: true max of the self-replication score
 
-# Languages that use the classic "bff" operator set, with operator bytes
-# equal to the ASCII codes of the characters themselves (see bff.inc.h,
-# GetOpKind, when BFF_CUSTOM_OPS is not defined).
-BFF_ASCII_LANGS = {"bff", "bff_noheads", "bff8", "bff8_noheads"}
-BFF_OP_BYTES = {
-    ord('['): '[', ord(']'): ']', ord('+'): '+', ord('-'): '-',
-    ord('.'): '.', ord(','): ',', ord('<'): '<', ord('>'): '>',
-    ord('{'): '{', ord('}'): '}',
-}
-
-
-def symbol_for_byte(b, lang):
-    """Human-readable representation of a single byte, plain ASCII only."""
-    if lang in BFF_ASCII_LANGS:
-        if b == 0:
-            return '0'
-        if b in BFF_OP_BYTES:
-            return BFF_OP_BYTES[b]
-        return '.'  # "data" byte, not a recognized operator
-    return '.'
-
-
-def render_symbols(data, lang):
-    return ''.join(symbol_for_byte(b, lang) for b in data)
-
-
-def diff_indices(before, after):
-    return [i for i, (a, b) in enumerate(zip(before, after)) if a != b]
-
-
-def match_fraction(a, b):
-    """Fraction of positions where the two tapes (64 bytes) match."""
-    if not a or not b:
-        return 0.0
-    n = min(len(a), len(b))
-    matches = sum(1 for i in range(n) if a[i] == b[i])
-    return matches / n
-
-
-def describe_changes(before, after, lang, label):
-    diffs = diff_indices(before, after)
-    if not diffs:
-        print(f"   {label}: no bytes changed")
-        return
-    print(f"   {label}: {len(diffs)}/{KSINGLE_TAPE_SIZE} bytes changed")
-    for i in diffs:
-        b_old, b_new = before[i], after[i]
-        s_old = symbol_for_byte(b_old, lang)
-        s_new = symbol_for_byte(b_new, lang)
-        print(f"     pos {i:2d}: 0x{b_old:02x} '{s_old}'  ->  "
-              f"0x{b_new:02x} '{s_new}'")
-
-
-def print_tape_line(label, prog1, prog2, lang):
-    s1 = render_symbols(prog1, lang)
-    s2 = render_symbols(prog2, lang)
-    print(f"   {label}: {s1} | {s2}")
-
-
-def print_pair_interaction(epoch, pair_idx, total_pairs, p1, p2,
-                            before1, before2, after1, after2, lang,
-                            header_extra=""):
-    print(f"\n--- epoch {epoch}, pair {pair_idx + 1}/{total_pairs}: "
-          f"program #{p1}  x  program #{p2}{header_extra} ---")
-    print("   (single concatenated tape: 64 bytes of prog. #%d | 64 bytes of prog. #%d)"
-          % (p1, p2))
-    print_tape_line("before", before1, before2, lang)
-    print_tape_line("after ", after1, after2, lang)
-    describe_changes(before1, after1, lang, f"program #{p1}")
-    describe_changes(before2, after2, lang, f"program #{p2}")
-
-
 def build_params(args):
     params = cubff.SimulationParams()
     params.num_programs = args.num_programs
@@ -193,29 +159,25 @@ def build_params(args):
     params.mutation_prob = round(args.mutation_prob * (1 << 30))
     params.callback_interval = 1
     params.permute_programs = not args.no_permute
-    # eval_selfrep is fixed for the WHOLE run and never toggled again once
-    # RunSimulation starts (toggling it mid-run proved unsafe in practice).
-    # Phase "search" needs it off almost always (only flipped on for a
-    # single epoch right at the moment entropy crosses the threshold,
-    # inside the callback itself - see run_search()).
-    # Phase "track" never needs it at all: it already knows the
-    # replicator's index from the checkpoint and checks only that one
-    # program, cheaply, via EvalParsedSelfrep.
+    # eval_selfrep is off almost always (toggling it mid-run proved unsafe
+    # in practice): it is only flipped on for a single epoch right at the
+    # moment entropy crosses the threshold, inside the callback itself - see
+    # run_search().
     params.eval_selfrep = False
-    if args.phase == "track":
-        params.load_from = args.checkpoint
     return params
 
 
-def find_partner(shuffle_idx, target):
-    """Find the slot index that `target` was paired with this epoch, by
-    looking it up in the permutation array shuffle_idx (pairs are
-    (shuffle_idx[2k], shuffle_idx[2k+1]))."""
-    pos = shuffle_idx.index(target)
-    if pos % 2 == 0:
-        return shuffle_idx[pos + 1], pos // 2
-    else:
-        return shuffle_idx[pos - 1], pos // 2
+def get_git_commit():
+    """Short git commit hash of this script's checkout, or None if this is
+    not a git checkout or git is not available. Best-effort only: never
+    raises, since it is only informational metadata."""
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"], cwd=_THIS_DIR,
+            capture_output=True, text=True, timeout=5)
+        return out.stdout.strip() or None if out.returncode == 0 else None
+    except Exception:
+        return None
 
 
 def report_stats(state, prefix=""):
@@ -226,7 +188,7 @@ def report_stats(state, prefix=""):
 
 
 # ---------------------------------------------------------------------------
-# Phase 1: cheap entropy-only search, with a one-shot full-soup check plus
+# Search: cheap entropy-only search, with a one-shot full-soup check plus
 # cheap single-program confirmation once entropy crosses the threshold.
 # ---------------------------------------------------------------------------
 
@@ -239,6 +201,8 @@ def run_search(language, params, args):
         "stage": None,
         "candidate_id": None,
         "candidate_confirm_epochs": 0,
+        "confirmed": False,
+        "checkpoint_path": None,
     }
 
     def callback(state):
@@ -306,208 +270,131 @@ def run_search(language, params, args):
             return epoch >= args.max_epochs
 
         if state_holder["candidate_confirm_epochs"] >= args.confirm_epochs:
+            # One identifier shared by the replicator, its checkpoint and its
+            # metadata, so the files belonging to this run can be paired by
+            # name (see the module docstring, "Where things are saved").
+            rep_id = (f"{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
+                      f"_seed{args.seed}_epoch{epoch}_score{cur_score}")
+
+            # <id> alone does not say whether this run is comparable to
+            # another one with the same --seed: every parameter below can
+            # change the outcome even at equal seed. Recorded regardless of
+            # --save, since it documents the run even when only the
+            # checkpoint is kept.
+            metadata = {
+                "id": rep_id,
+                "seed": args.seed,
+                "num_programs": args.num_programs,
+                "mutation_prob": args.mutation_prob,
+                "permute_programs": not args.no_permute,
+                "lang": args.lang,
+                "threshold": args.threshold,
+                "confirm_epochs": args.confirm_epochs,
+                "max_epochs": args.max_epochs,
+                "confirmed_epoch": epoch,
+                "confirmed_program_index": cid,
+                "confirmed_score": cur_score,
+                "score_scale": SCORE_SCALE,
+                "saved_at_utc": datetime.now(timezone.utc).isoformat(),
+                "git_commit": get_git_commit(),
+            }
+
             if args.save:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-                filename = (f"replicator_{timestamp}_seed{args.seed}"
-                            f"_epoch{epoch}_score{cur_score}.bin")
-                save_path = os.path.join(args.save_dir, filename)
-                with open(save_path, "wb") as f:
+                replicator_dir = os.path.join(args.results_dir, "replicators")
+                os.makedirs(replicator_dir, exist_ok=True)
+                replicator_path = os.path.join(
+                    replicator_dir, f"replicator_{rep_id}.bin")
+                with open(replicator_path, "wb") as f:
                     f.write(prog_bytes)
-                print(f"   -> replicator saved to '{save_path}'")
-            with open(args.checkpoint, "wb") as f:
+                with open(os.path.join(replicator_dir,
+                                       f"replicator_{rep_id}.json"), "w") as f:
+                    json.dump(metadata, f, indent=2)
+                print(f"   -> replicator saved to '{replicator_path}'")
+
+            if args.checkpoint is not None:
+                # Explicit override: fixed path, not tied to rep_id.
+                checkpoint_path = args.checkpoint
+                os.makedirs(os.path.dirname(checkpoint_path) or ".",
+                            exist_ok=True)
+            else:
+                checkpoint_dir = os.path.join(args.results_dir, "checkpoints")
+                os.makedirs(checkpoint_dir, exist_ok=True)
+                checkpoint_path = os.path.join(
+                    checkpoint_dir, f"checkpoint_{rep_id}.dat")
+            with open(checkpoint_path, "wb") as f:
                 f.write(struct.pack("<QQQ", 1, args.num_programs, state.epoch))
                 f.write(soup)
-            with open(args.checkpoint + ".idx", "w") as f:
+            with open(checkpoint_path + ".idx", "w") as f:
                 f.write(str(cid))
+            # Always written next to the checkpoint (which is always saved),
+            # regardless of --save, so the run stays documented even when
+            # the replicator's raw bytes are not kept on their own.
+            with open(checkpoint_path + ".json", "w") as f:
+                json.dump(metadata, f, indent=2)
+
             print("\n" + "=" * 70)
             print(f"*** REPLICATOR CONFIRMED: program #{cid} "
                   f"(score {cur_score}/{SCORE_SCALE}, threshold "
                   f"{args.threshold}), stable for {args.confirm_epochs} "
                   f"epochs ***")
-            print(f"   checkpoint saved to '{args.checkpoint}' (index "
-                  f"saved to '{args.checkpoint}.idx')")
+            print(f"   checkpoint saved to '{checkpoint_path}' (index "
+                  f"saved to '{checkpoint_path}.idx', run parameters saved "
+                  f"to '{checkpoint_path}.json')")
             report_stats(state, prefix="   ")
             print("=" * 70)
+            state_holder["confirmed"] = True
+            state_holder["checkpoint_path"] = checkpoint_path
             return True
 
         return epoch >= args.max_epochs
 
     language.RunSimulation(params, None, callback)
+    return state_holder["confirmed"], state_holder["checkpoint_path"]
 
 
-# ---------------------------------------------------------------------------
-# Phase 2: precise tracking. The replicator's index is already known from
-# the checkpoint - no full-soup search here at all. eval_selfrep stays off
-# for the entire run; the replicator's own score is only recomputed, via a
-# cheap single-program call, on epochs where we actually print something.
-# ---------------------------------------------------------------------------
+def build_track_command(checkpoint_path, args):
+    """Command that follows the saved replicator with reseed_and_track.py.
+    Note: reseed_and_track.py runs with the engine's default mutation rate and
+    shuffling; if --mutation-prob or --no-permute were changed for the
+    search, the tracked continuation will not use them."""
+    epochs = args.then_track if args.then_track > 0 else 2000
+    return [sys.executable, "-u",
+            os.path.join(_THIS_DIR, "reseed_and_track.py"),
+            "--from-checkpoint", checkpoint_path,
+            "--epochs", str(epochs),
+            "--print-interval", "1",
+            "--stop-on-extinction"]
 
-def run_track(language, params, args):
-    with open(args.checkpoint + ".idx") as f:
-        replicator_id = int(f.read().strip())
-    print(f"Loaded checkpoint '{args.checkpoint}', known replicator index: "
-          f"#{replicator_id}\n")
-
-    state_holder = {
-        "prev_soup": None,
-        "detected_epoch": None,
-        "baseline_entropy": None,
-        "peak_entropy_since_detection": None,
-        "extinct": False,
-    }
-
-    def callback(state):
-        epoch = state.epoch
-        soup = bytes(state.soup)
-        prev_soup = state_holder["prev_soup"]
-
-        if state_holder["detected_epoch"] is None:
-            state_holder["detected_epoch"] = epoch
-            state_holder["baseline_entropy"] = state.higher_entropy
-            state_holder["peak_entropy_since_detection"] = state.higher_entropy
-            state_holder["prev_soup"] = soup
-            return epoch >= args.max_epochs
-
-        detected_epoch = state_holder["detected_epoch"]
-        track_limit_reached = (
-            args.track_epochs is not None
-            and epoch - detected_epoch > args.track_epochs
-        )
-        if track_limit_reached:
-            return True
-
-        baseline = state_holder["baseline_entropy"]
-        peak = state_holder["peak_entropy_since_detection"]
-        if state.higher_entropy > peak:
-            peak = state.higher_entropy
-            state_holder["peak_entropy_since_detection"] = peak
-
-        epochs_since_detect = epoch - detected_epoch
-        risen = (peak - baseline) >= args.entropy_min_rise
-        fallen_back = (
-            risen
-            and (state.higher_entropy - baseline)
-            <= args.entropy_revert_fraction * (peak - baseline)
-        )
-        extinct = (
-            epochs_since_detect >= args.min_epochs_before_revert
-            and fallen_back
-        )
-
-        if extinct:
-            print("\n" + "-" * 70)
-            print(f"*** Replicator #{replicator_id} appears to have gone "
-                  f"extinct (epoch {epoch}): higher_entropy had risen to "
-                  f"{peak:.6f} (baseline ~{baseline:.6f}) but fell back to "
-                  f"{state.higher_entropy:.6f}. Stopping tracking - run "
-                  f"phase 'search' again from a later point to look for a "
-                  f"new replicator.")
-            print("-" * 70 + "\n")
-            state_holder["extinct"] = True
-            return True
-
-        show_epoch = (
-            prev_soup is not None
-            and epochs_since_detect % max(1, args.every) == 0
-        )
-
-        if show_epoch:
-            shuffle = list(state.shuffle_idx)
-            partner_id, pair_idx = find_partner(shuffle, replicator_id)
-            total_pairs = len(shuffle) // 2
-
-            r_id, p_id = replicator_id, partner_id
-            b_r = prev_soup[r_id * KSINGLE_TAPE_SIZE:(r_id + 1) * KSINGLE_TAPE_SIZE]
-            b_p = prev_soup[p_id * KSINGLE_TAPE_SIZE:(p_id + 1) * KSINGLE_TAPE_SIZE]
-            a_r = soup[r_id * KSINGLE_TAPE_SIZE:(r_id + 1) * KSINGLE_TAPE_SIZE]
-            a_p = soup[p_id * KSINGLE_TAPE_SIZE:(p_id + 1) * KSINGLE_TAPE_SIZE]
-
-            copy_fraction = max(match_fraction(a_p, b_r),
-                                 match_fraction(a_r, b_p))
-            is_copy_event = copy_fraction >= args.copy_similarity
-
-            total_changed = (len(diff_indices(b_r, a_r))
-                              + len(diff_indices(b_p, a_p)))
-            is_significant_mutation = total_changed >= args.min_changed_bytes
-            is_notable = is_copy_event or is_significant_mutation
-
-            cur_score = language.EvalParsedSelfrep(
-                cubff.VectorUint8(a_r), epoch, args.seed, False)
-
-            tag = ""
-            if is_copy_event:
-                tag = (f"  [SUCCESSFUL SELF-REPLICATION "
-                       f"({copy_fraction * 100:.0f}% matching bytes)]")
-            elif is_significant_mutation:
-                tag = f"  [significant mutation ({total_changed} bytes)]"
-
-            header_extra = (f"  [replicator, current score "
-                             f"{cur_score}/{SCORE_SCALE}]{tag}")
-
-            print(f"\n--- epoch {epoch}, pair {pair_idx + 1}/{total_pairs}: "
-                  f"program #{r_id}  x  program #{p_id}{header_extra} ---")
-            print_tape_line("before", b_r, b_p, args.lang)
-            print_tape_line("after ", a_r, a_p, args.lang)
-
-            if is_notable:
-                describe_changes(b_r, a_r, args.lang, f"program #{r_id}")
-                describe_changes(b_p, a_p, args.lang, f"program #{p_id}")
-                if cur_score < args.threshold:
-                    print(f"   (note: score dropped below threshold "
-                          f"{args.threshold}; still following program "
-                          f"#{replicator_id})")
-
-        state_holder["prev_soup"] = soup
-        return epoch >= args.max_epochs
-
-    language.RunSimulation(params, None, callback)
-
-    if state_holder["extinct"]:
-        print("Simulation finished (replicator went extinct).")
-    else:
-        print("Simulation finished.")
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Two-phase cubff runner: 'search' cheaply watches soup "
-                    "entropy and confirms a candidate replicator with "
-                    "single-program checks; 'track' reloads the resulting "
-                    "checkpoint (already knowing the replicator's index) "
-                    "and shows its interactions epoch by epoch.")
-    parser.add_argument("--phase", choices=["search", "track"], required=True,
-                         help="'search': cheap entropy-only phase; confirms "
-                              "a candidate and saves a checkpoint + index. "
-                              "'track': loads that checkpoint and index and "
-                              "follows the known replicator.")
-    parser.add_argument("--checkpoint", default="checkpoint.dat",
-                         help="Path to the checkpoint file written by "
-                              "--phase search (soup contents) and read by "
-                              "--phase track. The confirmed replicator's "
-                              "index is stored alongside it as "
-                              "<checkpoint>.idx (default: checkpoint.dat).")
+        description="cubff runner that cheaply watches soup entropy and "
+                    "confirms a candidate replicator with single-program "
+                    "checks, then saves it with a checkpoint of the soup. "
+                    "Use reseed_and_track.py --from-checkpoint to follow it.")
+    parser.add_argument("--checkpoint", default=None,
+                         help="Override the checkpoint's path (advanced). "
+                              "By default the checkpoint is auto-named "
+                              "inside <results-dir>/checkpoints/, sharing "
+                              "an identifier with the replicator saved at "
+                              "the same time. If given explicitly, that "
+                              "exact path is used instead (with its "
+                              "'.idx' sidecar written next to it), "
+                              "independently of --results-dir.")
     parser.add_argument("--confirm-epochs", type=int, default=5,
-                         help="Phase 'search' only: number of epochs to "
+                         help="Number of epochs to "
                               "confirm a candidate replicator (cheap "
                               "single-program checks) before saving it "
                               "(default 5).")
     parser.add_argument("--lang", default="bff_noheads",
-                         help="Language (default: bff_noheads). Readable "
-                              "symbols work for: "
-                              + ", ".join(sorted(BFF_ASCII_LANGS))
-                              + "; for other languages only the hex view "
-                                "is shown.")
+                         help="Language (default: bff_noheads).")
     parser.add_argument("--num-programs", type=int, default=PAPER_NUM_PROGRAMS,
                          help=f"Number of programs in the soup (must be "
                               f"even; default {PAPER_NUM_PROGRAMS}, i.e. "
                               f"PAPER_NUM_PROGRAMS).")
     parser.add_argument("--max-epochs", type=int, default=200000,
-                         help="Maximum number of epochs to run in this "
-                              "phase (default 200000).")
-    parser.add_argument("--track-epochs", type=int, default=None,
-                         help="Phase 'track' only: how many epochs to keep "
-                              "showing interactions before stopping "
-                              "(default: no limit, continues until "
-                              "--max-epochs).")
+                         help="Maximum number of epochs to run "
+                              "(default 200000).")
     parser.add_argument("--threshold", type=int, default=DEFAULT_THRESHOLD,
                          help="Minimum self-replication score (0-"
                               f"{SCORE_SCALE} scale) for a program to be "
@@ -515,19 +402,17 @@ def main():
                               f"{DEFAULT_THRESHOLD}, same as the engine's "
                               "own cubff.kSelfrepThreshold).")
     parser.add_argument("--save", type=int, default=1, choices=[0, 1],
-                     help="Phase 'search' only: if 1 (default), once a "
+                     help="If 1 (default), once a "
                           "candidate is confirmed its raw 64 bytes are "
-                          "saved to a file inside --save-dir. If 0, "
+                          "saved inside --results-dir/replicators/. If 0, "
                           "nothing is saved there (the checkpoint is still "
                           "written).")
-    parser.add_argument("--save-dir", default="replicators",
-                     help="Folder where confirmed replicators are saved "
-                          "(default: 'replicators'; created if it does "
-                          "not exist).")
-    parser.add_argument("--every", type=int, default=1,
-                         help="Phase 'track' only: show the interaction "
-                              "detail only every N epochs (default 1 = "
-                              "every epoch).")
+    parser.add_argument("--results-dir", default="soup_inspector_results",
+                     help="Root folder for a confirmed replicator's "
+                          "'replicators/' and 'checkpoints/' subfolders "
+                          "(default: 'soup_inspector_results'; created if "
+                          "missing). See the module docstring for the "
+                          "naming scheme.")
     parser.add_argument("--seed", type=int, default=PAPER_SEEDED_EPOCHS)
     parser.add_argument("--mutation-prob", type=float,
                          default=PAPER_DEFAULT_MUTATION_RATE,
@@ -542,33 +427,11 @@ def main():
                               "nothing notable is happening (0 to "
                               "disable).")
 
-    group = parser.add_argument_group(
-        "Phase 'track': filter for which events are shown")
-    group.add_argument("--min-changed-bytes", type=int, default=4,
-                        help="Minimum total number of bytes changed "
-                             "(across both programs in the pair) for an "
-                             "epoch to be shown as a 'significant "
-                             "mutation' (default 4).")
-    group.add_argument("--copy-similarity", type=float, default=0.6,
-                        help="Minimum fraction (0-1) of identical bytes "
-                             "for an event to be labeled 'successful "
-                             "self-replication' (default 0.6 = 60%%).")
-
-    group2 = parser.add_argument_group(
-        "Phase 'track': extinction detection")
-    group2.add_argument("--entropy-min-rise", type=float, default=0.05,
-                         help="How much higher_entropy must have risen "
-                              "above its value at load time before we "
-                              "consider a later fall a real relapse "
-                              "(default 0.05).")
-    group2.add_argument("--entropy-revert-fraction", type=float, default=0.3,
-                         help="If, after rising, higher_entropy falls back "
-                              "below baseline + this fraction of the peak "
-                              "reached, the replicator is considered "
-                              "extinct (default 0.3 = 30%%).")
-    group2.add_argument("--min-epochs-before-revert", type=int, default=20,
-                         help="Minimum tracked epochs before extinction "
-                              "can be declared (default 20).")
+    parser.add_argument("--then-track", type=int, default=0,
+                         help="If > 0, right after a replicator is saved, "
+                              "launch reseed_and_track.py --from-checkpoint "
+                              "for this many epochs, as a separate process. "
+                              "If 0 (default), only the command is printed.")
     args = parser.parse_args()
 
     if args.num_programs % 2 != 0:
@@ -576,27 +439,24 @@ def main():
         sys.stderr.write(
             f"num-programs must be even: rounded up to {args.num_programs}\n")
 
-    if args.lang not in BFF_ASCII_LANGS:
-        sys.stderr.write(
-            f"Note: '{args.lang}' is not in the list of languages with "
-            "readable symbols; only the hex view will be shown.\n")
-
-    if args.phase == "search" and args.save:
-        os.makedirs(args.save_dir, exist_ok=True)
-
     language = cubff.GetLanguage(args.lang)
     params = build_params(args)
 
-    print(f"Phase: {args.phase} | language: {args.lang} | programs: "
+    print(f"language: {args.lang} | programs: "
           f"{args.num_programs} | max epochs: {args.max_epochs} | "
           f"threshold: {args.threshold}/{SCORE_SCALE} | seed: {args.seed}\n")
 
     cubff.ResetColors()
 
-    if args.phase == "search":
-        run_search(language, params, args)
-    else:
-        run_track(language, params, args)
+    confirmed, checkpoint_path = run_search(language, params, args)
+
+    if confirmed:
+        cmd = build_track_command(checkpoint_path, args)
+        print("\nTo follow the replicator, run:\n    " + " ".join(cmd))
+        if args.then_track > 0:
+            print("\nLaunching it now...\n")
+            sys.stdout.flush()
+            subprocess.run(cmd, check=False)
 
 
 if __name__ == "__main__":
