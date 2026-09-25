@@ -354,13 +354,24 @@ def run_search(language, params, args):
 
 def build_track_command(checkpoint_path, args):
     """Command that follows the saved replicator with reseed_and_track.py.
-    Note: reseed_and_track.py runs with the engine's default mutation rate and
-    shuffling; if --mutation-prob or --no-permute were changed for the
-    search, the tracked continuation will not use them."""
+    IMPORTANT: --seed must match the seed used to generate the checkpoint,
+    because the engine's per-epoch randomness is a deterministic function
+    of (params.seed, epoch) - see common_language.h's `seed` lambda in
+    RunSimulation. Without this, continuation diverges from the true
+    trajectory starting at the very first epoch after reload - confirmed
+    experimentally: with the wrong seed, the tracked replicator was
+    reliably killed at the first epoch regardless of its confirmed score;
+    with the correct seed (verified via bin/main --load), the same
+    checkpoint showed the replicator's lineage still dominating ~96% of
+    the soup (125566/131072 programs) at that same epoch.
+    Also note: reseed_and_track.py runs with the engine's default mutation
+    rate and shuffling; if --mutation-prob or --no-permute were changed for
+    the search, the tracked continuation will not use them."""
     epochs = args.then_track if args.then_track > 0 else 2000
     return [sys.executable, "-u",
             os.path.join(_THIS_DIR, "reseed_and_track.py"),
             "--from-checkpoint", checkpoint_path,
+            "--seed", str(args.seed),
             "--epochs", str(epochs),
             "--print-interval", "1",
             "--stop-on-extinction"]

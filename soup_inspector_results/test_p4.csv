@@ -1,0 +1,2 @@
+seed,lang,num_programs,mutation_prob,permute_programs,max_epochs,callback_interval,entropy_threshold,transition_epoch,entropy_at_transition,last_epoch,final_entropy,wall_seconds
+104,bff_noheads,131072,0.000244140625,True,16000,1,1.0,1753,1.074994,1753,1.074994,498.1
