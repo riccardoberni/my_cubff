@@ -38,13 +38,21 @@ Typical usage (from the cubff/cubff folder, after building with PYTHON=1):
 
     # summary over all parts
     python3 transition_survey.py --summarize part1.csv part2.csv part3.csv part4.csv
+
+    # Fig. 7 "seeded": random soup plus the paper's hand-written
+    # self-replicator (the one of its Fig. 4) placed in a random position,
+    # run for 128 epochs
+    python3 -u transition_survey.py --seeds 1-1000 --max-epochs 128 \
+        --full-run --initial-program paper_fig4 --out survey_fig7_seeded.csv
 """
 
 import argparse
 import csv
 import math
 import os
+import struct
 import sys
+import tempfile
 import time
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -62,11 +70,122 @@ CSV_FIELDS = [
     "max_epochs", "callback_interval", "entropy_threshold",
     "transition_epoch", "entropy_at_transition",
     "last_epoch", "final_entropy", "wall_seconds",
+    # Appended last so that the column positions of older CSVs do not change.
+    "initial_program", "initial_program_index",
 ]
 
 # Fig. 6, 0.024% row: fraction of runs whose FIRST crossing of complexity >= 1
 # falls in each 2000-epoch bucket; the last value is "no transition in 16k".
 PAPER_FIG6_DEFAULT_ROW = [0.09, 0.08, 0.04, 0.05, 0.04, 0.03, 0.04, 0.03, 0.60]
+
+
+TAPE_SIZE = 64  # bytes per program (kSingleTapeSize in cubff)
+
+# Hand-written self-replicator shown in Fig. 4 of the paper and used for the
+# "seeded" condition of its Fig. 7: a 64-byte palindrome made of the copy
+# loop, 48 non-coding bytes (spaces in the paper's figure) and the mirrored
+# loop.
+NAMED_PROGRAMS = {
+    "paper_fig4": b"[[{.>]-]" + b" " * 48 + b"]-]>.{[[",
+}
+
+
+def resolve_initial_program(spec):
+    """'paper_fig4' or 128 hex digits -> the 64 bytes of the program."""
+    if spec in NAMED_PROGRAMS:
+        program = NAMED_PROGRAMS[spec]
+    else:
+        try:
+            program = bytes.fromhex(spec)
+        except ValueError:
+            sys.exit(f"--initial-program: '{spec}' is neither a known name "
+                     f"({', '.join(NAMED_PROGRAMS)}) nor a hex string")
+    if len(program) != TAPE_SIZE:
+        sys.exit(f"--initial-program must be {TAPE_SIZE} bytes, "
+                 f"got {len(program)}")
+    return program
+
+
+MASK64 = (1 << 64) - 1
+
+
+def splitmix64(x):
+    """Same generator as SplitMix64() in cubff's common_language.h."""
+    z = (x + 0x9e3779b97f4a7c15) & MASK64
+    z = ((z ^ (z >> 30)) * 0xbf58476d1ce4e5b9) & MASK64
+    z = ((z ^ (z >> 27)) * 0x94d049bb133111eb) & MASK64
+    return z ^ (z >> 31)
+
+
+def engine_initial_soup(seed, num_programs):
+    """The random soup the engine itself creates for this seed, byte for byte
+    (InitPrograms in common_language.h), as a numpy uint8 array."""
+    import numpy as np
+    init_seed = splitmix64(splitmix64(seed) ^ splitmix64(0))
+    base = (TAPE_SIZE * num_programs * init_seed) & MASK64
+    with np.errstate(over="ignore"):  # 64-bit wrap-around is intended
+        z = np.arange(TAPE_SIZE * num_programs, dtype=np.uint64)
+        z = z + np.uint64(base)
+        z = z + np.uint64(0x9e3779b97f4a7c15)
+        z = (z ^ (z >> np.uint64(30))) * np.uint64(0xbf58476d1ce4e5b9)
+        z = (z ^ (z >> np.uint64(27))) * np.uint64(0x94d049bb133111eb)
+        z = z ^ (z >> np.uint64(31))
+    return (z & np.uint64(0xFF)).astype(np.uint8)
+
+
+def seeded_index(seed, num_programs):
+    """Position of the added program: uniform over the soup, and a fixed
+    function of the run's seed so that every run can be reproduced."""
+    return splitmix64(splitmix64(seed) ^ splitmix64(0x5EEDED)) % num_programs
+
+
+def write_initial_checkpoint(soup, num_programs, tmp_dir):
+    """Write `soup` as a cubff checkpoint at epoch 0 and return its path.
+    Layout (see RunSimulation): reset_index, num_programs, epoch as 64-bit
+    integers, followed by the soup bytes."""
+    fd, path = tempfile.mkstemp(prefix="seeded_", suffix=".dat", dir=tmp_dir)
+    with os.fdopen(fd, "wb") as f:
+        f.write(struct.pack("<QQQ", 1, num_programs, 0))
+        f.write(soup.tobytes())
+    return path
+
+
+def check_initial_soup(cubff, language, args, seed):
+    """Make sure that loading our own copy of the initial soup is equivalent
+    to letting the engine initialize it: after one epoch the two soups must
+    be identical. Guards against any mismatch between engine_initial_soup()
+    and the engine actually in use."""
+    def soup_after_first_epoch(load_from):
+        params = cubff.SimulationParams()
+        params.num_programs = args.num_programs
+        params.seed = seed
+        params.mutation_prob = args.mutation_raw
+        params.callback_interval = args.callback_interval
+        params.permute_programs = not args.no_permute
+        params.fixed_shuffle = args.fixed_shuffle
+        params.eval_selfrep = False
+        if load_from:
+            params.load_from = load_from
+        out = {}
+
+        def callback(state):
+            out["soup"] = bytes(state.soup)
+            return True
+        language.RunSimulation(params, None, callback)
+        return out["soup"]
+
+    path = write_initial_checkpoint(
+        engine_initial_soup(seed, args.num_programs), args.num_programs,
+        args.tmp_dir)
+    try:
+        same = soup_after_first_epoch(None) == soup_after_first_epoch(path)
+    finally:
+        os.remove(path)
+    if not same:
+        sys.exit("The initial soup built by this script does not match the "
+                 "engine's own initialization. Nothing was run.")
+    print("initial soup check passed: loading our copy of the random soup "
+          "is equivalent to the engine's own initialization")
 
 
 def import_cubff():
@@ -105,7 +224,8 @@ def config_key(row):
     """Fields that must match for two rows to belong to the same experiment."""
     return (row["lang"], int(row["num_programs"]), float(row["mutation_prob"]),
             str(row["permute_programs"]), str(row.get("fixed_shuffle", False)),
-            int(row["max_epochs"]), float(row["entropy_threshold"]))
+            int(row["max_epochs"]), float(row["entropy_threshold"]),
+            row.get("initial_program") or "")
 
 
 def read_rows(paths):
@@ -141,7 +261,25 @@ def run_one(cubff, language, seed, args, trace_path=None):
     params.eval_selfrep = False  # never touched again
 
     result = {"transition_epoch": None, "entropy_at_transition": None,
-              "last_epoch": 0, "final_entropy": None}
+              "last_epoch": 0, "final_entropy": None,
+              "initial_program_index": None}
+    checkpoint = None
+    if args.initial_program_bytes is not None:
+        # "Seeded" run: the engine's own random soup for this seed, with one
+        # program replaced by the given one. The soup is handed to the engine
+        # as a checkpoint at epoch 0, so the rest of the run (pairing and
+        # mutations) is exactly that of the unseeded run with the same seed.
+        import numpy as np
+        index = (args.initial_program_index
+                 if args.initial_program_index is not None
+                 else seeded_index(seed, args.num_programs))
+        soup = engine_initial_soup(seed, args.num_programs)
+        soup[index * TAPE_SIZE:(index + 1) * TAPE_SIZE] = np.frombuffer(
+            args.initial_program_bytes, dtype=np.uint8)
+        checkpoint = write_initial_checkpoint(soup, args.num_programs,
+                                              args.tmp_dir)
+        params.load_from = checkpoint
+        result["initial_program_index"] = index
     trace = open(trace_path, "w") if trace_path else None
     if trace:
         trace.write("epoch,higher_entropy\n")
@@ -168,6 +306,8 @@ def run_one(cubff, language, seed, args, trace_path=None):
     finally:
         if trace:
             trace.close()
+        if checkpoint:
+            os.remove(checkpoint)
     result["wall_seconds"] = round(time.time() - t0, 1)
     return result
 
@@ -177,6 +317,13 @@ def run_survey(args):
     args.mutation_raw = encode_mutation_prob(args.mutation_prob)
     args.mutation_prob = args.mutation_raw / (1 << 30)  # effective value
     check_mutation_encoding(cubff, args.mutation_raw)
+    args.initial_program_bytes = None
+    if args.initial_program:
+        args.initial_program_bytes = resolve_initial_program(
+            args.initial_program)
+        if (args.initial_program_index is not None and not
+                0 <= args.initial_program_index < args.num_programs):
+            sys.exit("--initial-program-index out of range")
     language = cubff.GetLanguage(args.lang)
     if hasattr(cubff, "ResetColors"):
         cubff.ResetColors()
@@ -185,11 +332,14 @@ def run_survey(args):
     todo = [s for s in parse_seeds(args.seeds) if s not in done]
     print(f"lang={args.lang} programs={args.num_programs} "
           f"mutation={args.mutation_prob} max_epochs={args.max_epochs} "
-          f"callback_interval={args.callback_interval} | "
+          f"callback_interval={args.callback_interval} "
+          f"initial_program={args.initial_program or 'none'} | "
           f"{len(done)} seeds already in '{args.out}', {len(todo)} to run")
 
     if args.trace_dir:
         os.makedirs(args.trace_dir, exist_ok=True)
+    if args.initial_program and todo:
+        check_initial_soup(cubff, language, args, todo[0])
 
     new_file = not os.path.exists(args.out) or os.path.getsize(args.out) == 0
     with open(args.out, "a", newline="") as f:
@@ -218,12 +368,20 @@ def run_survey(args):
                 "final_entropy": ("" if r["final_entropy"] is None
                                   else f"{r['final_entropy']:.6f}"),
                 "wall_seconds": r["wall_seconds"],
+                "initial_program": args.initial_program or "",
+                "initial_program_index": (
+                    "" if r["initial_program_index"] is None
+                    else r["initial_program_index"]),
             })
             f.flush()  # keep the CSV consistent if the process is killed
-            status = (f"transition at epoch {r['transition_epoch']}"
+            status = (f"threshold first reached at epoch "
+                      f"{r['transition_epoch']}"
                       if r["transition_epoch"] is not None
-                      else "no transition")
-            print(f"[{i}/{len(todo)}] seed {seed}: {status} "
+                      else f"threshold not reached by epoch {args.max_epochs}")
+            final = ("n/a" if r["final_entropy"] is None
+                     else f"{r['final_entropy']:.3f}")
+            print(f"[{i}/{len(todo)}] seed {seed}: {status}, entropy "
+                  f"{final} at epoch {r['last_epoch']} "
                   f"({r['wall_seconds']} s)")
 
 
@@ -234,7 +392,7 @@ def wilson_interval(k, n, z=1.96):
     denom = 1 + z * z / n
     centre = (p + z * z / (2 * n)) / denom
     half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
-    return (centre - half, centre + half)
+    return (max(0.0, centre - half), min(1.0, centre + half))
 
 
 def summarize(paths, bucket=2000):
@@ -247,7 +405,7 @@ def summarize(paths, bucket=2000):
         groups.setdefault(config_key(r), {})[int(r["seed"])] = r  # dedup seeds
 
     for key, by_seed in groups.items():
-        lang, n_prog, mut, permute, fixed, max_epochs, thr = key
+        lang, n_prog, mut, permute, fixed, max_epochs, thr, initial = key
         n = len(by_seed)
         epochs = [int(r["transition_epoch"]) for r in by_seed.values()
                   if r["transition_epoch"] != ""]
@@ -255,9 +413,21 @@ def summarize(paths, bucket=2000):
         lo, hi = wilson_interval(k, n)
         print(f"\n=== lang={lang} programs={n_prog} mutation={mut} "
               f"permute={permute} fixed_shuffle={fixed} "
-              f"max_epochs={max_epochs} threshold={thr} ===")
+              f"max_epochs={max_epochs} threshold={thr} "
+              f"initial_program={initial or 'none'} ===")
         print(f"runs: {n} | with transition: {k} ({k / n:.1%}, "
               f"95% CI {lo:.1%}-{hi:.1%})")
+        # End-of-run criterion of the paper's Fig. 7. Only meaningful for
+        # surveys made with --full-run: otherwise a transitioning seed stops
+        # at the transition and its last entropy is not the end-of-run one.
+        full = [r for r in by_seed.values()
+                if r["final_entropy"] != ""
+                and int(r["last_epoch"]) >= max_epochs]
+        if len(full) == n:
+            kf = sum(float(r["final_entropy"]) >= thr for r in full)
+            lof, hif = wilson_interval(kf, n)
+            print(f"above threshold at the end of the run: {kf} "
+                  f"({kf / n:.1%}, 95% CI {lof:.1%}-{hif:.1%})")
 
         n_buckets = math.ceil(max_epochs / bucket)
         counts = [0] * n_buckets
@@ -269,7 +439,7 @@ def summarize(paths, bucket=2000):
         print("ours     " + " ".join(f"{x:7.2f}" for x in fractions))
         if (abs(mut - 2 ** -12) < 1e-12 and permute == "True"
                 and fixed == "False" and max_epochs == 16000
-                and bucket == 2000):
+                and bucket == 2000 and not initial):
             print("paper    " + " ".join(f"{x:7.2f}"
                                          for x in PAPER_FIG6_DEFAULT_ROW))
 
@@ -314,6 +484,19 @@ def main():
     parser.add_argument("--full-run", action="store_true",
                         help="Do not stop at the transition: always run "
                              "--max-epochs (needed for Fig. 5 curves).")
+    parser.add_argument("--initial-program", default=None,
+                        help="Replace one program of the random initial "
+                             "soup with the given one (the paper's 'seeded' "
+                             "runs). Either a known name ('paper_fig4', the "
+                             "hand-written self-replicator of the paper's "
+                             "Fig. 4) or the 64 bytes as 128 hex digits.")
+    parser.add_argument("--initial-program-index", type=int, default=None,
+                        help="Position (program index) of --initial-program "
+                             "in the soup. Default: a random position, "
+                             "different for every seed, as in the paper.")
+    parser.add_argument("--tmp-dir", default=None,
+                        help="Directory for the temporary initial-soup files "
+                             "of seeded runs (default: system temp dir).")
     parser.add_argument("--trace-dir", default=None,
                         help="If set, write the entropy trace of every seed "
                              "to <trace-dir>/seed<N>.csv.")
