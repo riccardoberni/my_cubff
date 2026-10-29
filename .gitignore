@@ -13,3 +13,4 @@ slurm-*.out
 # NOT ignored here.
 soup_inspector_results/checkpoints/
 _run_*.dat
+spatial_results/*/snapshots/

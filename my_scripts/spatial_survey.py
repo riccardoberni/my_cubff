@@ -21,8 +21,6 @@ For every seed the script records, every --callback-interval epochs:
   * the number of programs that the engine's self-replication check
     (eval_selfrep, score >= kSelfrepThreshold = 5) marks as self-replicators,
     which measures how much of the grid has been taken over;
-  * the number of pairs executed in the last epoch and, with
-    --long-range-prob, how many of them were long-range.
 and, every --snapshot-interval epochs, the whole grid (bytes and
 self-replication scores) as a compressed .npz file, used for the images
 (plot_spatial_snapshots.py) and for the spatial analyses.
@@ -34,13 +32,22 @@ therefore uses only the first (num_programs // 32) * 32 programs for the
 self-replicator counts and fractions, and stores a score of 0 for the others
 in the snapshots.
 
---long-range-prob > 0 needs an engine built with long_range_prob.patch.
+Long-range interactions without modifying the engine (--rewire-prob p): the
+list of allowed interactions given to the engine is built from the grid as
+usual and then every entry (a neighbour of a program) is replaced, with
+probability p, by a program drawn uniformly at random among those outside the
+neighbourhood, as in the small-world networks of Watts and Strogatz. The
+engine then picks a partner from this list exactly as on the grid, so a
+fraction p of the partners it picks are, on average, distant programs. The
+rewired list is drawn once per run, from the run's seed and p, so every run
+can be repeated. p = 0 is the grid of the paper; p = 1 is a random network in
+which no partner is a grid neighbour.
 
 Outputs, in --out-dir:
   summary.csv              one row per seed (appended; seeds already present
                            are skipped, so the survey can be resumed)
   traces/seed<N>.csv       time series of the measures above
-  snapshots/seed<N>_epoch<E>.npz
+  snapshots/seed<N>_epoch<E>.npz, snapshots/seed<N>_final.npz
                            soup (H, W, 64) uint8, selfrep (H, W) uint8
 
 Typical usage (from the repository root, on a GPU node):
@@ -83,19 +90,20 @@ SELFREP_MILESTONES = [0.01, 0.1, 0.5, 0.9]
 
 CONFIG_FIELDS = [
     "lang", "width", "height", "radius", "well_mixed", "mutation_prob",
-    "long_range_prob",
+    "rewire_prob",
     "max_epochs", "callback_interval", "entropy_threshold", "eval_selfrep",
     "initial_program", "initial_position",
 ]
 SUMMARY_FIELDS = (
     ["seed"] + CONFIG_FIELDS +
-    ["initial_program_index", "extinct", "transition_epoch",
+    ["initial_program_index", "rewired_fraction", "extinct",
+     "transition_epoch",
      "entropy_at_transition",
      "last_epoch", "final_entropy", "final_selfrep_fraction"] +
     [f"epoch_selfrep_{int(f * 100)}pct" for f in SELFREP_MILESTONES] +
     ["wall_seconds"])
 TRACE_FIELDS = ["epoch", "higher_entropy", "h0", "brotli_bpb", "num_selfrep",
-                "selfrep_fraction", "num_pairs", "num_long_range_pairs"]
+                "selfrep_fraction"]
 
 
 def grid_neighbours(width, height, radius):
@@ -116,6 +124,36 @@ def grid_neighbours(width, height, radius):
     return neighbours
 
 
+def rewire(neighbours, p, width, height, radius, seed):
+    """Replace every entry of the neighbour lists, with probability p, by a
+    program drawn uniformly among those outside the neighbourhood of the
+    program (and different from it). Returns the new lists and the fraction
+    of entries actually replaced."""
+    if p <= 0:
+        return neighbours, 0.0
+    rng = np.random.default_rng([seed, int(round(p * 1_000_000)), 0x5EED])
+    num_programs = width * height
+    owner = np.concatenate([np.full(len(row), i, dtype=np.int64)
+                            for i, row in enumerate(neighbours)])
+    flat = np.concatenate([np.asarray(row, dtype=np.int64)
+                           for row in neighbours])
+    replace = rng.random(len(flat)) < p
+    idx = np.nonzero(replace)[0]
+    new = rng.integers(0, num_programs, len(idx))
+    while True:
+        # Reject the program itself and its grid neighbours.
+        dr = np.abs(new // width - owner[idx] // width)
+        dc = np.abs(new % width - owner[idx] % width)
+        bad = (dr <= radius) & (dc <= radius)
+        if not bad.any():
+            break
+        new[bad] = rng.integers(0, num_programs, int(bad.sum()))
+    flat[idx] = new
+    lengths = np.cumsum([len(row) for row in neighbours])[:-1]
+    rewired = [row.tolist() for row in np.split(flat, lengths)]
+    return rewired, float(replace.mean())
+
+
 def config_of(args):
     return {
         "lang": args.lang,
@@ -124,7 +162,7 @@ def config_of(args):
         "radius": args.radius,
         "well_mixed": args.well_mixed,
         "mutation_prob": args.mutation_prob,
-        "long_range_prob": args.long_range_prob,
+        "rewire_prob": args.rewire_prob,
         "max_epochs": args.max_epochs,
         "callback_interval": args.callback_interval,
         "entropy_threshold": args.entropy_threshold,
@@ -135,17 +173,19 @@ def config_of(args):
 
 
 def same_config(row, config):
+    defaults = {"rewire_prob": "0.0", "well_mixed": "False"}
     for key, value in config.items():
+        stored = row.get(key) or defaults.get(key, "")
         if isinstance(value, bool):
-            if row[key] != str(value):
+            if stored != str(value):
                 return False
         elif isinstance(value, float):
-            if abs(float(row[key]) - value) > 1e-15:
+            if abs(float(stored) - value) > 1e-15:
                 return False
         elif isinstance(value, int):
-            if int(row[key]) != value:
+            if int(stored) != value:
                 return False
-        elif row[key] != value:
+        elif stored != value:
             return False
     return True
 
@@ -166,13 +206,18 @@ def run_one(cubff, language, neighbours, seed, args):
     params.mutation_prob = args.mutation_raw
     params.callback_interval = args.callback_interval
     params.eval_selfrep = not args.no_selfrep
+    rewired_fraction = ""
     if neighbours is not None:
+        if args.rewire_prob > 0:
+            neighbours, rewired_fraction = rewire(
+                neighbours, args.rewire_prob, args.width, args.height,
+                args.radius, seed)
+            rewired_fraction = f"{rewired_fraction:.6f}"
         params.allowed_interactions = [cubff.VectorUint32(x)
                                        for x in neighbours]
-    if args.long_range_prob > 0:
-        params.long_range_prob = args.long_range_raw
 
     result = {"initial_program_index": "", "extinct": False,
+              "rewired_fraction": rewired_fraction,
               "transition_epoch": "",
               "entropy_at_transition": "", "last_epoch": 0,
               "final_entropy": "", "final_selfrep_fraction": ""}
@@ -210,12 +255,9 @@ def run_one(cubff, language, neighbours, seed, args):
             fraction = num_selfrep / num_checked
         else:
             scores, num_selfrep, fraction = None, "", ""
-        num_pairs = getattr(state, "num_pairs", "")
-        num_long = getattr(state, "num_long_range_pairs", "")
         writer.writerow([epoch, f"{h:.6f}", f"{state.h0:.6f}",
                          f"{state.brotli_bpb:.6f}", num_selfrep,
-                         f"{fraction:.6f}" if fraction != "" else "",
-                         num_pairs, num_long])
+                         f"{fraction:.6f}" if fraction != "" else ""])
         trace.flush()
 
         result["last_epoch"] = epoch
@@ -230,26 +272,33 @@ def run_one(cubff, language, neighbours, seed, args):
                 if milestones[f] == "" and fraction >= f:
                     milestones[f] = epoch
 
-        if args.snapshot_interval and (epoch - 1) % args.snapshot_interval == 0:
+        stop = epoch >= args.max_epochs
+        if (args.stop_fraction is not None and fraction != ""
+                and fraction >= args.stop_fraction):
+            stop = True
+        if (args.stop_if_extinct_after is not None and fraction != ""
+                and epoch >= args.stop_if_extinct_after and num_selfrep == 0):
+            result["extinct"] = True
+            stop = True
+
+        names = []
+        if (args.snapshot_interval and (epoch - 1) % args.snapshot_interval == 0
+                and epoch >= args.snapshot_from):
+            names.append(f"seed{seed}_epoch{epoch}.npz")
+        if args.snapshot_final and stop and not result["extinct"]:
+            names.append(f"seed{seed}_final.npz")
+        if names:
             soup = np.frombuffer(bytes(state.soup), dtype=np.uint8)
             selfrep = (np.minimum(scores, 255).astype(np.uint8)
                        if scores is not None
                        else np.zeros(num_programs, dtype=np.uint8))
-            np.savez_compressed(
-                os.path.join(args.out_dir, "snapshots",
-                             f"seed{seed}_epoch{epoch}.npz"),
-                soup=soup.reshape(args.height, args.width, TAPE_SIZE),
-                selfrep=selfrep.reshape(args.height, args.width),
-                epoch=epoch, seed=seed)
-
-        if (args.stop_fraction is not None and fraction != ""
-                and fraction >= args.stop_fraction):
-            return True
-        if (args.stop_if_extinct_after is not None and fraction != ""
-                and epoch >= args.stop_if_extinct_after and num_selfrep == 0):
-            result["extinct"] = True
-            return True
-        return epoch >= args.max_epochs
+            for name in names:
+                np.savez_compressed(
+                    os.path.join(args.out_dir, "snapshots", name),
+                    soup=soup.reshape(args.height, args.width, TAPE_SIZE),
+                    selfrep=selfrep.reshape(args.height, args.width),
+                    epoch=epoch, seed=seed)
+        return stop
 
     t0 = time.time()
     try:
@@ -266,15 +315,9 @@ def run_one(cubff, language, neighbours, seed, args):
 
 def run_survey(args):
     cubff = import_cubff()
-    if args.long_range_prob > 0 and not hasattr(cubff.SimulationParams(),
-                                                "long_range_prob"):
-        sys.exit("--long-range-prob needs an engine built with "
-                 "long_range_prob.patch")
     language = cubff.GetLanguage(args.lang)
     args.mutation_raw = encode_mutation_prob(args.mutation_prob)
     args.mutation_prob = args.mutation_raw / (1 << 30)  # effective value
-    args.long_range_raw = round(args.long_range_prob * (1 << 30))
-    args.long_range_prob = args.long_range_raw / (1 << 30)
     args.initial_program_bytes = (resolve_initial_program(args.initial_program)
                                   if args.initial_program else None)
 
@@ -301,12 +344,19 @@ def run_survey(args):
         neighbours = grid_neighbours(args.width, args.height, args.radius)
         print(f"grid {args.width} x {args.height} = "
               f"{args.width * args.height} programs, radius {args.radius}, "
-              f"long_range_prob {args.long_range_prob}, mutation_prob "
+              f"rewire_prob {args.rewire_prob}, mutation_prob "
               f"{args.mutation_prob}")
 
     new_file = not os.path.exists(summary_path)
+    fieldnames = SUMMARY_FIELDS
+    if not new_file:
+        # Append with the columns of the existing file (older versions of
+        # this script wrote slightly different columns).
+        with open(summary_path, newline="") as f:
+            fieldnames = next(csv.reader(f), SUMMARY_FIELDS) or SUMMARY_FIELDS
     with open(summary_path, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=SUMMARY_FIELDS)
+        writer = csv.DictWriter(f, fieldnames=fieldnames,
+                                extrasaction="ignore")
         if new_file:
             writer.writeheader()
         for seed in parse_seeds(args.seeds):
@@ -379,11 +429,13 @@ def main():
     parser.add_argument("--mutation-prob", type=float, default=2 ** -12,
                         help="Per-byte mutation probability (default 2^-12, "
                              "the engine and paper default).")
-    parser.add_argument("--long-range-prob", type=float, default=0.0,
-                        help="Probability that a program picks its partner "
-                             "among all the programs of the grid instead of "
-                             "among its neighbours (needs "
-                             "long_range_prob.patch).")
+    parser.add_argument("--rewire-prob", type=float, default=0.0,
+                        help="Fraction p of long-range interactions: every "
+                             "entry of the list of allowed interactions is "
+                             "replaced, with probability p, by a random "
+                             "program outside the neighbourhood "
+                             "(small-world rewiring; no change to the "
+                             "engine).")
     parser.add_argument("--entropy-threshold", type=float,
                         default=PAPER_TRANSITION_ENTROPY_THRESHOLD)
     parser.add_argument("--callback-interval", type=int, default=64)
@@ -393,6 +445,12 @@ def main():
     parser.add_argument("--snapshot-interval", type=int, default=1024,
                         help="Epochs between grid snapshots (0 = none). Must "
                              "be a multiple of --callback-interval.")
+    parser.add_argument("--snapshot-from", type=int, default=0,
+                        help="Write snapshots only from this epoch on.")
+    parser.add_argument("--snapshot-final", action="store_true",
+                        help="Also write the grid at the last measurement of "
+                             "every run that does not end with the seeded "
+                             "replicator extinct (snapshots/seed<N>_final.npz).")
     parser.add_argument("--stop-fraction", type=float, default=None,
                         help="Stop a run when this fraction of the grid is "
                              "made of self-replicators.")
@@ -424,12 +482,12 @@ def main():
     if args.snapshot_interval % args.callback_interval:
         parser.error("--snapshot-interval must be a multiple of "
                      "--callback-interval")
-    if not 0 <= args.long_range_prob <= 1:
-        parser.error("--long-range-prob must be in [0, 1]")
+    if not 0 <= args.rewire_prob <= 1:
+        parser.error("--rewire-prob must be in [0, 1]")
     if args.stop_if_extinct_after is not None and not args.initial_program:
         parser.error("--stop-if-extinct-after is only for seeded runs")
-    if args.well_mixed and args.long_range_prob > 0:
-        parser.error("--well-mixed and --long-range-prob are incompatible")
+    if args.well_mixed and args.rewire_prob > 0:
+        parser.error("--well-mixed and --rewire-prob are incompatible")
     run_survey(args)
 
 
