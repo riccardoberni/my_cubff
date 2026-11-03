@@ -1,0 +1,17 @@
+seed 171: first sample above the threshold at epoch 2209; tracking 30 origins; a tape carries the replicator's tokens if it holds >= 20 of them; examining epochs 1954-2209
+compiling: gcc -O3 -fopenmp -shared -fPIC -o /g100/home/userexternal/rberni00/cubff/my_scripts/libbff_tokens.so /g100/home/userexternal/rberni00/cubff/my_scripts/bff_tokens.c
+reached epoch 1953
+unique tokens at epoch 2209: 1487379 (token_soup.py recorded 1487379) -> consistent
+
+first replicator: created by the interaction of epoch index 2151 (the soup after 2152 epochs contains it)
+pair: program 53300 (tape A, executed first) + program 90914 (tape B)
+tape holding the tracked tokens afterwards: program 90914 (26 of 30 tracked origins)
+A  before: |      {      }    0  }  . } }   }  -}        }}[}  }-          ,|
+B  before: |   <   ]    {                           [               -       |
+A  after:  |      {      }    0  }  . } }   } }   } } .  }  0    }      {   |
+B  after:  |    }      -  [}  ,<]            ] < ,     } [}    -      }   } |
+self-replication score (engine, 0-64, threshold 5): A 0, B 0 before; A 0, B 3 after
+written soup_inspector_results/tokens/seed171_emergence.csv and soup_inspector_results/tokens/seed171_first_replicator.npz
+
+tapes carrying the replicator's tokens, epoch by epoch:
+2151:0 2152:1 2153:2 2154:4 2155:4 2156:4 2157:7 2158:6 2159:5 2160:5 2161:5 2162:7 2163:7 2164:6 2165:6 2166:5 2167:8 2168:10 2169:12 2170:16 2171:20 2172:28 2173:35 2174:49 2175:61 2176:73 2177:90 2178:116 2179:151 2180:184 2181:236 2182:313 2183:415 2184:541 2185:689 2186:902 2187:1166 2188:1478 2189:1899 2190:2434
