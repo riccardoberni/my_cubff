@@ -139,9 +139,8 @@ def median_curve(directory, seeds, step):
 
 
 def seeded_results(results_dir):
-    out = []
-    rng = np.random.default_rng(0)
-    for d in glob.glob(os.path.join(results_dir, "rewire_seeded_p*")):
+    out, per_run = [], []
+    for d in sorted(glob.glob(os.path.join(results_dir, "rewire_seeded_p*"))):
         rows = read_rows(d)
         if not rows:
             continue
@@ -154,7 +153,14 @@ def seeded_results(results_dir):
         for r in survived:
             path = os.path.join(d, "snapshots", f"seed{r['seed']}_final.npz")
             if os.path.exists(path):
+                # One generator per run, so that the random pairs of a run
+                # do not depend on the order in which the runs are read.
+                rng = np.random.default_rng(
+                    [int(r["seed"]), int(round(p * 1_000_000))])
                 e, v = spatial_metrics(path, rng)
+                per_run.append({"rewire_prob": p, "seed": r["seed"],
+                                "excess_similarity": f"{e:.6f}",
+                                "effective_variants": f"{v:.2f}"})
                 if not math.isnan(e):
                     excess.append(e)
                     variants.append(v)
@@ -164,7 +170,7 @@ def seeded_results(results_dir):
                     "rewired": rewired_fractions(rows),
                     "t50": t50, "t90": t90, "excess": np.array(excess),
                     "variants": np.array(variants), "curve": (grid, curve)})
-    return sorted(out, key=lambda c: c["p"])
+    return sorted(out, key=lambda c: c["p"]), per_run
 
 
 def rewired_fractions(rows):
@@ -247,9 +253,20 @@ def main():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--results-dir", default="spatial_results")
     parser.add_argument("--out", default="images/rewire.pdf")
+    parser.add_argument("--metrics-csv",
+                        default="spatial_results/rewire_spatial_metrics.csv",
+                        help="Per-run neighbour excess similarity and "
+                             "effective number of variants (the final "
+                             "snapshots they come from are not versioned).")
     args = parser.parse_args()
 
-    seeded = seeded_results(args.results_dir)
+    seeded, per_run = seeded_results(args.results_dir)
+    if per_run:
+        with open(args.metrics_csv, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=list(per_run[0]))
+            writer.writeheader()
+            writer.writerows(per_run)
+        print(f"wrote {args.metrics_csv} ({len(per_run)} runs)")
     unseeded, reference, unseeded_rewired = unseeded_results(args.results_dir)
     if not seeded and not unseeded:
         raise SystemExit(f"no rewire_* results in {args.results_dir}")

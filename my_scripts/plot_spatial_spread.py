@@ -4,7 +4,7 @@
 plot_spatial_spread.py
 
 Spread speed of a self-replicator in the spatial soup and in the well-mixed
-soup (Experiment 8), from the runs of cluster/run_spatial_spread.sbatch.
+soup (Experiment 9), from the runs of cluster/run_spatial_spread.sbatch.
 
 The paper (Section 2.2) states that, once a self-replicator appears, it takes
 over half of a well-mixed soup of n programs in about log n epochs, and half of

@@ -5,7 +5,7 @@
 #SBATCH --time=00:10:00
 #SBATCH --output=slurm-%x-%j.out
 
-# Experiment 8, spread speed: table, fits and figure from the results of
+# Experiment 9, spread speed: table, fits and figure from the results of
 # run_spatial_spread.sbatch (spatial_results/spread_*/summary.csv).
 
 source cluster/setup_env.sh

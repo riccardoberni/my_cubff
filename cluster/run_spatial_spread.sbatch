@@ -5,7 +5,7 @@
 #SBATCH --time=08:00:00
 #SBATCH --output=slurm-%x-%j.out
 
-# Experiment 8, spread speed: the paper's Fig. 4 replicator placed at the
+# Experiment 9, spread speed: the paper's Fig. 4 replicator placed at the
 # centre of square grids of side 32, 64, 128 and 256, and in well-mixed soups
 # with the same number of programs; seeds 1-200 for each configuration.
 # A run stops when 90% of the programs are self-replicators, or as soon as

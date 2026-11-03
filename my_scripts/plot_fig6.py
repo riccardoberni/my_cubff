@@ -1,26 +1,23 @@
 #!/usr/bin/env python3
 """
-plot_fig6.py -- Aggregate the mutation-rate-ablation survey CSVs produced by
-transition_survey.py and compare them against the paper's Fig. 6 ("fraction
-of runs that never reach the state-transition entropy threshold" per
-mutation rate). Produces:
+plot_fig6.py
 
-  1. A PNG heatmap: paper vs. ours (plus a difference row), one column per
-     mutation rate.
-  2. LaTeX table rows (rate, n, paper's no-transition %, our no-transition %
-     with a Wilson 95% CI, and whether the paper's value falls inside our CI).
+Mutation-rate ablation (Experiment 4, paper Fig. 6): reads the survey CSVs
+written by transition_survey.py, one per mutation rate, and compares the
+fraction of runs that never reach the state-transition threshold with the
+values of the paper's Fig. 6 (column "N/A"). Produces:
 
-This script is standalone: it only needs csv / matplotlib / numpy, no cubff
-or CUDA. Run it anywhere the CSVs are available (the cluster, or after
-scp-ing the CSVs to your own machine).
+  1. a heatmap, paper against reproduction, with a row of differences, one
+     column per mutation rate;
+  2. LaTeX table rows (rate, n, paper's no-transition %, reproduced
+     no-transition % with its Wilson 95% interval), with a comment line
+     stating for how many rates the paper's value falls inside the interval.
 
----------------------------------------------------------------------------
-USAGE
----------------------------------------------------------------------------
-Pass one "path:rate" pair per mutation-rate CSV you collected, e.g. (this is
-exactly the mapping used throughout the conversation on the cluster):
+Only csv, numpy and matplotlib are needed (no cubff).
 
-    python3 plot_fig6.py \
+Usage (from the repository root): one "path:rate" entry per CSV,
+
+    python3 my_scripts/plot_fig6.py \
         soup_inspector_results/survey_mut0.csv:0.0 \
         soup_inspector_results/survey_mut012.csv:0.00012 \
         soup_inspector_results/survey_200.csv:0.00024 \
@@ -31,13 +28,9 @@ exactly the mapping used throughout the conversation on the cluster):
         --out images/fig6_replication.png \
         --tex images/fig6_table_rows.tex
 
-":rate" is optional -- if you omit it the script tries to read the rate
-from a "mutation_prob" (or similarly named) column inside the CSV itself.
-
-If your CSV uses column names this script doesn't recognise, it will print
-the columns it *did* find and tell you to pass --transition-col / --rate-col
-explicitly. It never guesses silently.
----------------------------------------------------------------------------
+The ":rate" suffix is optional; without it the rate is read from the
+mutation_prob column of the CSV. If the columns cannot be identified, the
+script lists the columns found and stops (use --transition-col / --rate-col).
 """
 import argparse
 import csv
@@ -53,15 +46,15 @@ import numpy as np
 # ---------------------------------------------------------------------------
 # The paper's Fig. 6 numbers (percentage of runs that NEVER reach the
 # entropy-based state-transition threshold, at the default 131072-program /
-# random-pairing / 16000-epoch setting). Values taken from the paper table
-# used throughout this thesis chapter.
+# random-pairing / 16000-epoch setting), read from the "N/A" column of the
+# paper's Fig. 6.
 # ---------------------------------------------------------------------------
 PAPER_RATES = [0.0, 0.00012, 0.00024, 0.00048, 0.001, 0.005, 0.01]
 PAPER_LABELS = ["0%", "0.012%", "0.024%\n(default)", "0.048%", "0.1%", "0.5%", "1%"]
 PAPER_NO_TRANSITION_PCT = [56.0, 65.0, 60.0, 50.0, 42.0, 62.0, 94.0]
 RATE_TOLERANCE = 1e-5
 
-# Column names we'll try, in order, to detect whether a run transitioned.
+# Column names tried, in order, to detect whether a run transitioned.
 TRANSITION_EPOCH_COLS = [
     "transition_epoch", "transitioned_epoch", "epoch_transition",
     "first_transition_epoch", "epoch_reached", "epoch_above_threshold",
@@ -177,7 +170,8 @@ def nearest_paper_index(rate):
 
 
 def draw_heatmap(results, out_path):
-    """results: list of dicts with keys rate, label, n, k, paper_pct, our_pct, lo, hi"""
+    """results: list of dicts with keys rate, label, n, k, paper_pct, our_pct,
+    lo, hi."""
     labels = [r["label"] for r in results]
     paper_row = [r["paper_pct"] for r in results]
     our_row = [r["our_pct"] for r in results]
@@ -193,8 +187,8 @@ def draw_heatmap(results, out_path):
     ax1.set_xticks(range(len(labels)))
     ax1.set_xticklabels(labels, fontsize=9)
     ax1.set_yticks([0, 1])
-    ax1.set_yticklabels(["Paper", "Ours"])
-    ax1.set_title("Fraction of runs with NO state transition, by mutation rate")
+    ax1.set_yticklabels(["Paper", "This work"])
+    ax1.set_title("Runs without a state transition (%), by mutation rate")
     for i, row in enumerate(grid):
         for j, v in enumerate(row):
             ax1.text(j, i, f"{v:.1f}%", ha="center", va="center", fontsize=9,
@@ -206,8 +200,8 @@ def draw_heatmap(results, out_path):
     ax2.axhline(0, color="black", linewidth=0.8)
     ax2.set_xticks(range(len(labels)))
     ax2.set_xticklabels(labels, fontsize=9)
-    ax2.set_ylabel("Ours - Paper (pp)")
-    ax2.set_title("Difference (positive = we see more non-transitioning runs)")
+    ax2.set_ylabel("difference (pp)")
+    ax2.set_title("This work minus paper (percentage points)")
 
     fig.tight_layout()
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
@@ -221,13 +215,14 @@ def build_latex_rows(results):
     for r in results:
         inside = r["lo"] * 100 <= r["paper_pct"] <= r["hi"] * 100
         inside_count += int(inside)
-        flag = "" if inside else "  % OUTSIDE our 95% CI"
+        flag = "" if inside else "  % outside the 95% CI"
         lines.append(
             f"{r['rate_str']} & {r['n']} & {r['paper_pct']:.0f}\\% & "
             f"{r['our_pct']:.1f}\\% & "
             f"[{r['lo']*100:.1f}\\%, {r['hi']*100:.1f}\\%] \\\\{flag}"
         )
-    summary = f"% Paper's value falls inside our 95% CI for {inside_count}/{len(results)} mutation rates."
+    summary = (f"% Paper's value inside the 95% CI for {inside_count}/"
+               f"{len(results)} mutation rates.")
     return lines, summary
 
 
@@ -287,7 +282,7 @@ def main():
     results.sort(key=lambda r: r["paper_idx"])
 
     print(f"{'rate':>14} {'n':>5} {'k(trans.)':>10} {'paper no-trans%':>16} "
-          f"{'our no-trans%':>14} {'95% CI':>18}")
+          f"{'repr. no-trans%':>15} {'95% CI':>18}")
     for r in results:
         print(f"{r['rate']*100:>13.4g}% {r['n']:>5} {r['k']:>10} "
               f"{r['paper_pct']:>15.1f}% {r['our_pct']:>13.1f}% "

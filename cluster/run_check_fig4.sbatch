@@ -6,8 +6,10 @@
 #SBATCH --output=slurm-%x-%j.out
 
 # Cross-check of plot_fig4.py against the engine (bin/main --run) for the
-# 23 steps shown in the paper's Fig. 4.
+# 23 steps shown in the paper's Fig. 4. The output is also saved in
+# soup_inspector_results/check_fig4_engine.log.
 
 source cluster/setup_env.sh
 
-python3 -u my_scripts/check_fig4_engine.py --main bin/main
+python3 -u my_scripts/check_fig4_engine.py --main bin/main \
+    | tee soup_inspector_results/check_fig4_engine.log

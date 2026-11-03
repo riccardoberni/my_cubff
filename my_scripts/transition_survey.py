@@ -9,14 +9,11 @@ for each seed, a fresh random soup is simulated and the first epoch at which
 the soup's higher-order entropy reaches the transition threshold (1.0) is
 recorded.
 
-Differences from soup_inspector.py:
-  * eval_selfrep is NEVER enabled (no full-soup self-replication checks, no
-    mid-run toggling), only the aggregate entropy the engine already
-    computes is read. Cheaper, and immune to the toggling issues.
-  * No checkpoints, no replicator files: one CSV row per seed.
-  * Resumable: seeds already present in the output CSV are skipped, so the
-    survey can be interrupted and restarted, or split across several
-    processes by seed range (one --out file per process).
+The self-replication check (eval_selfrep) is never enabled: only the
+high-order entropy computed by the engine is read, and one CSV row is written
+per seed. The survey is resumable: seeds already present in the output CSV
+are skipped, so it can be interrupted and restarted, or split across several
+processes by seed range (one --out file per process).
 
 Defaults follow cubff's bin/main (the tool the paper's experiments were run
 with): entropy measured every 64 epochs (bin/main --print_interval default)
@@ -201,7 +198,7 @@ def import_cubff():
 
 
 def encode_mutation_prob(p):
-    """Same encoding used by soup_inspector.py: probability * 2^30."""
+    """Encoding of the engine (common.h): probability * 2^30."""
     return round(p * (1 << 30))
 
 

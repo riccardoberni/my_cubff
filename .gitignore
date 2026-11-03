@@ -14,3 +14,4 @@ slurm-*.out
 soup_inspector_results/checkpoints/
 _run_*.dat
 spatial_results/*/snapshots/
+my_scripts/*.so

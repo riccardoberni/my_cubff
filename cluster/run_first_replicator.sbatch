@@ -7,9 +7,12 @@
 #SBATCH --output=slurm-%x-%j.out
 
 # Tracer tokens: find the epoch and the pair of programs where the first
-# self-replicator of the case-study run (seed 171) emerges.
+# self-replicator of the case-study run (seed 171) emerges. The output
+# (pair of programs, self-replication scores) is also saved in
+# soup_inspector_results/tokens/seed171_first_replicator.log.
 
 source cluster/setup_env.sh
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-1}
 
-python3 -u my_scripts/find_first_replicator.py --seed 171
+python3 -u my_scripts/find_first_replicator.py --seed 171 \
+    | tee soup_inspector_results/tokens/seed171_first_replicator.log
