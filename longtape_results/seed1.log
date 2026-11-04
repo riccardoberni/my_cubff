@@ -1,0 +1,409 @@
+[info] compressor in use: zlib (level=6)
+[info] tape_size=65536 head1_offset=16 max_steps_per_window=8192
+[info] dumping tape snapshots every 50,000,000 instructions to 'longtape_results/seed1/tape_dumps_seed1/'
+[info] saving resumable checkpoints to 'longtape_results/seed1/seed1_2000000000instr_ckpt.dat' (at the end only)
+[report] instructions=       8,192 windows=         1 high_order_entropy=-0.006 elapsed=    0.0s mops_s=  0.77
+[report] instructions=   5,005,313 windows=       614 high_order_entropy= 0.294 elapsed=    6.8s mops_s=  0.74
+[report] instructions=  10,002,433 windows=     1,225 high_order_entropy= 0.414 elapsed=   13.4s mops_s=  0.75
+[report] instructions=  15,007,766 windows=     1,840 high_order_entropy= 0.681 elapsed=   20.1s mops_s=  0.75
+[report] instructions=  20,004,886 windows=     2,451 high_order_entropy= 0.736 elapsed=   26.6s mops_s=  0.75
+[report] instructions=  25,002,006 windows=     3,061 high_order_entropy= 0.728 elapsed=   33.4s mops_s=  0.75
+[report] instructions=  30,007,318 windows=     3,672 high_order_entropy= 0.764 elapsed=   40.1s mops_s=  0.75
+[report] instructions=  35,005,590 windows=     4,283 high_order_entropy= 0.738 elapsed=   46.8s mops_s=  0.75
+[report] instructions=  40,002,710 windows=     4,893 high_order_entropy= 0.872 elapsed=   53.5s mops_s=  0.75
+[report] instructions=  45,004,198 windows=     5,504 high_order_entropy= 1.079 elapsed=   60.5s mops_s=  0.74
+[report] instructions=  50,006,670 windows=     6,121 high_order_entropy= 1.037 elapsed=   67.6s mops_s=  0.74
+[report] instructions=  55,003,790 windows=     6,731 high_order_entropy= 0.942 elapsed=   74.4s mops_s=  0.74
+[report] instructions=  60,007,215 windows=     7,346 high_order_entropy= 0.903 elapsed=   81.4s mops_s=  0.74
+[report] instructions=  65,008,149 windows=     7,963 high_order_entropy= 0.883 elapsed=   88.3s mops_s=  0.74
+[report] instructions=  70,005,269 windows=     8,573 high_order_entropy= 0.886 elapsed=   95.1s mops_s=  0.74
+[report] instructions=  75,000,742 windows=     9,184 high_order_entropy= 0.882 elapsed=  101.9s mops_s=  0.74
+[report] instructions=  80,005,248 windows=     9,796 high_order_entropy= 0.869 elapsed=  108.7s mops_s=  0.74
+[report] instructions=  85,007,119 windows=    10,409 high_order_entropy= 0.865 elapsed=  115.5s mops_s=  0.74
+[report] instructions=  90,003,604 windows=    11,020 high_order_entropy= 0.849 elapsed=  122.2s mops_s=  0.74
+[report] instructions=  95,007,337 windows=    11,633 high_order_entropy= 0.847 elapsed=  129.0s mops_s=  0.74
+[report] instructions= 100,000,367 windows=    12,245 high_order_entropy= 0.892 elapsed=  135.9s mops_s=  0.74
+[report] instructions= 105,005,679 windows=    12,856 high_order_entropy= 0.920 elapsed=  142.7s mops_s=  0.74
+[report] instructions= 110,000,455 windows=    13,467 high_order_entropy= 0.975 elapsed=  149.5s mops_s=  0.74
+[report] instructions= 115,004,431 windows=    14,079 high_order_entropy= 1.034 elapsed=  156.3s mops_s=  0.74
+[report] instructions= 120,005,853 windows=    14,694 high_order_entropy= 1.100 elapsed=  163.2s mops_s=  0.74
+[report] instructions= 125,001,317 windows=    15,305 high_order_entropy= 1.090 elapsed=  170.0s mops_s=  0.74
+[report] instructions= 130,006,629 windows=    15,916 high_order_entropy= 1.079 elapsed=  176.7s mops_s=  0.74
+[report] instructions= 135,003,749 windows=    16,526 high_order_entropy= 1.073 elapsed=  183.5s mops_s=  0.74
+[report] instructions= 140,000,869 windows=    17,136 high_order_entropy= 1.079 elapsed=  190.1s mops_s=  0.74
+[report] instructions= 145,006,181 windows=    17,747 high_order_entropy= 1.093 elapsed=  196.8s mops_s=  0.74
+[report] instructions= 150,003,580 windows=    18,358 high_order_entropy= 1.088 elapsed=  203.4s mops_s=  0.74
+[report] instructions= 155,000,700 windows=    18,968 high_order_entropy= 1.096 elapsed=  210.1s mops_s=  0.74
+[report] instructions= 160,006,012 windows=    19,579 high_order_entropy= 1.097 elapsed=  216.7s mops_s=  0.74
+[report] instructions= 165,003,132 windows=    20,189 high_order_entropy= 1.110 elapsed=  223.3s mops_s=  0.74
+[report] instructions= 170,001,133 windows=    20,800 high_order_entropy= 1.153 elapsed=  230.0s mops_s=  0.74
+[report] instructions= 175,006,445 windows=    21,411 high_order_entropy= 1.177 elapsed=  236.6s mops_s=  0.74
+[report] instructions= 180,003,565 windows=    22,021 high_order_entropy= 1.190 elapsed=  243.2s mops_s=  0.74
+[report] instructions= 185,000,685 windows=    22,631 high_order_entropy= 1.187 elapsed=  249.8s mops_s=  0.74
+[report] instructions= 190,005,997 windows=    23,242 high_order_entropy= 1.173 elapsed=  256.4s mops_s=  0.74
+[report] instructions= 195,003,117 windows=    23,852 high_order_entropy= 1.162 elapsed=  263.1s mops_s=  0.74
+[report] instructions= 200,000,262 windows=    24,463 high_order_entropy= 1.151 elapsed=  269.7s mops_s=  0.74
+[report] instructions= 205,005,404 windows=    25,074 high_order_entropy= 1.150 elapsed=  276.3s mops_s=  0.74
+[report] instructions= 210,002,699 windows=    25,685 high_order_entropy= 1.143 elapsed=  283.0s mops_s=  0.74
+[report] instructions= 215,002,208 windows=    26,297 high_order_entropy= 1.140 elapsed=  289.7s mops_s=  0.74
+[report] instructions= 220,007,520 windows=    26,908 high_order_entropy= 1.138 elapsed=  296.3s mops_s=  0.74
+[report] instructions= 225,003,898 windows=    27,519 high_order_entropy= 1.134 elapsed=  302.9s mops_s=  0.74
+[report] instructions= 230,002,199 windows=    28,130 high_order_entropy= 1.128 elapsed=  309.5s mops_s=  0.74
+[report] instructions= 235,007,536 windows=    28,742 high_order_entropy= 1.125 elapsed=  316.2s mops_s=  0.74
+[report] instructions= 240,004,656 windows=    29,352 high_order_entropy= 1.136 elapsed=  322.7s mops_s=  0.74
+[report] instructions= 245,002,945 windows=    29,963 high_order_entropy= 1.151 elapsed=  329.3s mops_s=  0.74
+[report] instructions= 250,001,230 windows=    30,574 high_order_entropy= 1.232 elapsed=  335.9s mops_s=  0.74
+[report] instructions= 255,006,542 windows=    31,185 high_order_entropy= 1.169 elapsed=  342.5s mops_s=  0.74
+[report] instructions= 260,003,662 windows=    31,795 high_order_entropy= 1.152 elapsed=  349.1s mops_s=  0.74
+[report] instructions= 265,000,508 windows=    32,405 high_order_entropy= 1.138 elapsed=  355.7s mops_s=  0.75
+[report] instructions= 270,005,820 windows=    33,016 high_order_entropy= 1.129 elapsed=  362.4s mops_s=  0.75
+[report] instructions= 275,002,940 windows=    33,626 high_order_entropy= 1.120 elapsed=  369.0s mops_s=  0.75
+[report] instructions= 280,000,060 windows=    34,236 high_order_entropy= 1.118 elapsed=  375.7s mops_s=  0.75
+[report] instructions= 285,005,372 windows=    34,847 high_order_entropy= 1.110 elapsed=  382.3s mops_s=  0.75
+[report] instructions= 290,003,430 windows=    35,458 high_order_entropy= 1.117 elapsed=  388.9s mops_s=  0.75
+[report] instructions= 295,007,989 windows=    36,070 high_order_entropy= 1.113 elapsed=  395.6s mops_s=  0.75
+[report] instructions= 300,008,038 windows=    36,681 high_order_entropy= 1.110 elapsed=  402.3s mops_s=  0.75
+[report] instructions= 305,005,436 windows=    37,292 high_order_entropy= 1.108 elapsed=  408.9s mops_s=  0.75
+[report] instructions= 310,002,556 windows=    37,902 high_order_entropy= 1.112 elapsed=  415.5s mops_s=  0.75
+[report] instructions= 315,007,868 windows=    38,513 high_order_entropy= 1.106 elapsed=  422.0s mops_s=  0.75
+[report] instructions= 320,004,115 windows=    39,128 high_order_entropy= 1.103 elapsed=  428.7s mops_s=  0.75
+[report] instructions= 325,001,478 windows=    39,743 high_order_entropy= 1.099 elapsed=  435.5s mops_s=  0.75
+[report] instructions= 330,005,284 windows=    40,356 high_order_entropy= 1.093 elapsed=  442.1s mops_s=  0.75
+[report] instructions= 335,000,939 windows=    40,970 high_order_entropy= 1.087 elapsed=  448.8s mops_s=  0.75
+[report] instructions= 340,003,601 windows=    41,587 high_order_entropy= 1.088 elapsed=  455.5s mops_s=  0.75
+[report] instructions= 345,002,575 windows=    42,202 high_order_entropy= 1.087 elapsed=  462.3s mops_s=  0.75
+[report] instructions= 350,005,702 windows=    42,818 high_order_entropy= 1.084 elapsed=  469.1s mops_s=  0.75
+[report] instructions= 355,004,949 windows=    43,433 high_order_entropy= 1.083 elapsed=  475.8s mops_s=  0.75
+[report] instructions= 360,006,036 windows=    44,049 high_order_entropy= 1.083 elapsed=  482.6s mops_s=  0.75
+[report] instructions= 365,006,735 windows=    44,663 high_order_entropy= 1.086 elapsed=  489.5s mops_s=  0.75
+[report] instructions= 370,000,783 windows=    45,282 high_order_entropy= 1.085 elapsed=  496.4s mops_s=  0.75
+[report] instructions= 375,000,291 windows=    45,899 high_order_entropy= 1.086 elapsed=  503.2s mops_s=  0.75
+[report] instructions= 380,001,456 windows=    46,517 high_order_entropy= 1.084 elapsed=  510.2s mops_s=  0.74
+[report] instructions= 385,003,579 windows=    47,132 high_order_entropy= 1.084 elapsed=  517.1s mops_s=  0.74
+[report] instructions= 390,003,741 windows=    47,748 high_order_entropy= 1.093 elapsed=  524.2s mops_s=  0.74
+[report] instructions= 395,000,679 windows=    48,366 high_order_entropy= 1.114 elapsed=  531.2s mops_s=  0.74
+[report] instructions= 400,005,199 windows=    48,983 high_order_entropy= 1.140 elapsed=  538.2s mops_s=  0.74
+[report] instructions= 405,003,819 windows=    49,597 high_order_entropy= 1.154 elapsed=  545.0s mops_s=  0.74
+[report] instructions= 410,003,808 windows=    50,212 high_order_entropy= 1.158 elapsed=  551.9s mops_s=  0.74
+[report] instructions= 415,003,772 windows=    50,829 high_order_entropy= 1.171 elapsed=  558.9s mops_s=  0.74
+[report] instructions= 420,005,352 windows=    51,442 high_order_entropy= 1.180 elapsed=  565.7s mops_s=  0.74
+[report] instructions= 425,003,462 windows=    52,060 high_order_entropy= 1.190 elapsed=  572.7s mops_s=  0.74
+[report] instructions= 430,000,139 windows=    52,674 high_order_entropy= 1.206 elapsed=  579.5s mops_s=  0.74
+[report] instructions= 435,004,317 windows=    53,290 high_order_entropy= 1.230 elapsed=  586.3s mops_s=  0.74
+[report] instructions= 440,003,024 windows=    53,906 high_order_entropy= 1.246 elapsed=  593.2s mops_s=  0.74
+[report] instructions= 445,007,598 windows=    54,517 high_order_entropy= 1.264 elapsed=  599.8s mops_s=  0.74
+[report] instructions= 450,005,031 windows=    55,129 high_order_entropy= 1.287 elapsed=  606.4s mops_s=  0.74
+[report] instructions= 455,002,285 windows=    55,741 high_order_entropy= 1.286 elapsed=  613.1s mops_s=  0.74
+[report] instructions= 460,003,056 windows=    56,356 high_order_entropy= 1.291 elapsed=  619.7s mops_s=  0.74
+[report] instructions= 465,000,463 windows=    56,967 high_order_entropy= 1.292 elapsed=  626.3s mops_s=  0.74
+[report] instructions= 470,007,914 windows=    57,583 high_order_entropy= 1.292 elapsed=  633.0s mops_s=  0.74
+[report] instructions= 475,006,136 windows=    58,198 high_order_entropy= 1.283 elapsed=  639.8s mops_s=  0.74
+[report] instructions= 480,006,258 windows=    58,815 high_order_entropy= 1.266 elapsed=  646.6s mops_s=  0.74
+[report] instructions= 485,000,360 windows=    59,430 high_order_entropy= 1.249 elapsed=  653.3s mops_s=  0.74
+[report] instructions= 490,000,290 windows=    60,043 high_order_entropy= 1.238 elapsed=  659.9s mops_s=  0.74
+[report] instructions= 495,005,945 windows=    60,655 high_order_entropy= 1.225 elapsed=  666.5s mops_s=  0.74
+[report] instructions= 500,000,853 windows=    61,268 high_order_entropy= 1.217 elapsed=  673.2s mops_s=  0.74
+[report] instructions= 505,000,335 windows=    61,881 high_order_entropy= 1.208 elapsed=  679.8s mops_s=  0.74
+[report] instructions= 510,003,996 windows=    62,493 high_order_entropy= 1.198 elapsed=  686.4s mops_s=  0.74
+[report] instructions= 515,001,877 windows=    63,107 high_order_entropy= 1.190 elapsed=  693.0s mops_s=  0.74
+[report] instructions= 520,005,318 windows=    63,726 high_order_entropy= 1.189 elapsed=  699.8s mops_s=  0.74
+[report] instructions= 525,006,443 windows=    64,350 high_order_entropy= 1.182 elapsed=  706.7s mops_s=  0.74
+[report] instructions= 530,004,462 windows=    64,967 high_order_entropy= 1.177 elapsed=  713.4s mops_s=  0.74
+[report] instructions= 535,001,089 windows=    65,582 high_order_entropy= 1.167 elapsed=  720.2s mops_s=  0.74
+[report] instructions= 540,007,435 windows=    66,201 high_order_entropy= 1.167 elapsed=  727.0s mops_s=  0.74
+[report] instructions= 545,000,111 windows=    66,819 high_order_entropy= 1.162 elapsed=  733.8s mops_s=  0.74
+[report] instructions= 550,003,112 windows=    67,437 high_order_entropy= 1.154 elapsed=  740.5s mops_s=  0.74
+[report] instructions= 555,008,099 windows=    68,059 high_order_entropy= 1.146 elapsed=  747.3s mops_s=  0.74
+[report] instructions= 560,004,204 windows=    68,680 high_order_entropy= 1.139 elapsed=  754.1s mops_s=  0.74
+[report] instructions= 565,006,362 windows=    69,297 high_order_entropy= 1.138 elapsed=  760.7s mops_s=  0.74
+[report] instructions= 570,001,668 windows=    69,910 high_order_entropy= 1.137 elapsed=  767.4s mops_s=  0.74
+[report] instructions= 575,007,994 windows=    70,525 high_order_entropy= 1.131 elapsed=  774.0s mops_s=  0.74
+[report] instructions= 580,005,649 windows=    71,141 high_order_entropy= 1.127 elapsed=  780.7s mops_s=  0.74
+[report] instructions= 585,006,096 windows=    71,758 high_order_entropy= 1.125 elapsed=  787.4s mops_s=  0.74
+[report] instructions= 590,007,193 windows=    72,374 high_order_entropy= 1.127 elapsed=  794.0s mops_s=  0.74
+[report] instructions= 595,001,356 windows=    72,985 high_order_entropy= 1.125 elapsed=  800.7s mops_s=  0.74
+[report] instructions= 600,001,356 windows=    73,600 high_order_entropy= 1.125 elapsed=  807.3s mops_s=  0.74
+[report] instructions= 605,002,879 windows=    74,216 high_order_entropy= 1.126 elapsed=  814.0s mops_s=  0.74
+[report] instructions= 610,003,762 windows=    74,833 high_order_entropy= 1.164 elapsed=  820.7s mops_s=  0.74
+[report] instructions= 615,002,378 windows=    75,453 high_order_entropy= 1.165 elapsed=  827.5s mops_s=  0.74
+[report] instructions= 620,006,856 windows=    76,066 high_order_entropy= 1.163 elapsed=  834.1s mops_s=  0.74
+[report] instructions= 625,005,609 windows=    76,681 high_order_entropy= 1.166 elapsed=  840.7s mops_s=  0.74
+[report] instructions= 630,002,684 windows=    77,296 high_order_entropy= 1.162 elapsed=  847.5s mops_s=  0.74
+[report] instructions= 635,000,550 windows=    77,914 high_order_entropy= 1.168 elapsed=  854.3s mops_s=  0.74
+[report] instructions= 640,003,440 windows=    78,527 high_order_entropy= 1.168 elapsed=  861.0s mops_s=  0.74
+[report] instructions= 645,006,829 windows=    79,147 high_order_entropy= 1.169 elapsed=  868.0s mops_s=  0.74
+[report] instructions= 650,002,357 windows=    79,764 high_order_entropy= 1.179 elapsed=  874.8s mops_s=  0.74
+[report] instructions= 655,005,068 windows=    80,381 high_order_entropy= 1.178 elapsed=  881.6s mops_s=  0.74
+[report] instructions= 660,002,460 windows=    80,999 high_order_entropy= 1.180 elapsed=  888.3s mops_s=  0.74
+[report] instructions= 665,000,071 windows=    81,617 high_order_entropy= 1.177 elapsed=  895.0s mops_s=  0.74
+[report] instructions= 670,004,314 windows=    82,236 high_order_entropy= 1.179 elapsed=  901.7s mops_s=  0.74
+[report] instructions= 675,000,290 windows=    82,849 high_order_entropy= 1.182 elapsed=  908.3s mops_s=  0.74
+[report] instructions= 680,001,563 windows=    83,465 high_order_entropy= 1.187 elapsed=  915.0s mops_s=  0.74
+[report] instructions= 685,003,848 windows=    84,078 high_order_entropy= 1.188 elapsed=  921.6s mops_s=  0.74
+[report] instructions= 690,005,853 windows=    84,694 high_order_entropy= 1.193 elapsed=  928.2s mops_s=  0.74
+[report] instructions= 695,005,136 windows=    85,308 high_order_entropy= 1.194 elapsed=  934.8s mops_s=  0.74
+[report] instructions= 700,005,137 windows=    85,923 high_order_entropy= 1.197 elapsed=  941.5s mops_s=  0.74
+[report] instructions= 705,001,936 windows=    86,538 high_order_entropy= 1.200 elapsed=  948.1s mops_s=  0.74
+[report] instructions= 710,007,944 windows=    87,155 high_order_entropy= 1.198 elapsed=  954.7s mops_s=  0.74
+[report] instructions= 715,005,417 windows=    87,768 high_order_entropy= 1.195 elapsed=  961.2s mops_s=  0.74
+[report] instructions= 720,002,504 windows=    88,380 high_order_entropy= 1.192 elapsed=  967.8s mops_s=  0.74
+[report] instructions= 725,005,912 windows=    88,994 high_order_entropy= 1.187 elapsed=  974.3s mops_s=  0.74
+[report] instructions= 730,005,423 windows=    89,608 high_order_entropy= 1.185 elapsed=  980.8s mops_s=  0.74
+[report] instructions= 735,007,535 windows=    90,220 high_order_entropy= 1.186 elapsed=  987.3s mops_s=  0.74
+[report] instructions= 740,001,728 windows=    90,834 high_order_entropy= 1.184 elapsed=  993.9s mops_s=  0.74
+[report] instructions= 745,005,602 windows=    91,448 high_order_entropy= 1.179 elapsed= 1000.4s mops_s=  0.74
+[report] instructions= 750,004,447 windows=    92,064 high_order_entropy= 1.179 elapsed= 1007.0s mops_s=  0.74
+[report] instructions= 755,004,745 windows=    92,680 high_order_entropy= 1.180 elapsed= 1013.6s mops_s=  0.74
+[report] instructions= 760,000,962 windows=    93,296 high_order_entropy= 1.182 elapsed= 1020.2s mops_s=  0.74
+[report] instructions= 765,003,464 windows=    93,913 high_order_entropy= 1.186 elapsed= 1026.8s mops_s=  0.75
+[report] instructions= 770,005,433 windows=    94,528 high_order_entropy= 1.187 elapsed= 1033.3s mops_s=  0.75
+[report] instructions= 775,001,652 windows=    95,140 high_order_entropy= 1.185 elapsed= 1039.8s mops_s=  0.75
+[report] instructions= 780,005,919 windows=    95,751 high_order_entropy= 1.179 elapsed= 1046.2s mops_s=  0.75
+[report] instructions= 785,005,263 windows=    96,364 high_order_entropy= 1.179 elapsed= 1052.7s mops_s=  0.75
+[report] instructions= 790,002,383 windows=    96,974 high_order_entropy= 1.177 elapsed= 1059.2s mops_s=  0.75
+[report] instructions= 795,004,755 windows=    97,587 high_order_entropy= 1.174 elapsed= 1065.7s mops_s=  0.75
+[report] instructions= 800,005,660 windows=    98,200 high_order_entropy= 1.173 elapsed= 1072.2s mops_s=  0.75
+[report] instructions= 805,002,780 windows=    98,810 high_order_entropy= 1.165 elapsed= 1078.7s mops_s=  0.75
+[report] instructions= 810,003,938 windows=    99,421 high_order_entropy= 1.172 elapsed= 1085.2s mops_s=  0.75
+[report] instructions= 815,000,167 windows=   100,035 high_order_entropy= 1.178 elapsed= 1091.7s mops_s=  0.75
+[report] instructions= 820,004,817 windows=   100,651 high_order_entropy= 1.179 elapsed= 1098.3s mops_s=  0.75
+[report] instructions= 825,006,176 windows=   101,263 high_order_entropy= 1.175 elapsed= 1104.8s mops_s=  0.75
+[report] instructions= 830,007,227 windows=   101,875 high_order_entropy= 1.181 elapsed= 1111.2s mops_s=  0.75
+[report] instructions= 835,007,546 windows=   102,489 high_order_entropy= 1.182 elapsed= 1117.8s mops_s=  0.75
+[report] instructions= 840,004,125 windows=   103,102 high_order_entropy= 1.196 elapsed= 1124.3s mops_s=  0.75
+[report] instructions= 845,004,797 windows=   103,714 high_order_entropy= 1.205 elapsed= 1130.7s mops_s=  0.75
+[report] instructions= 850,001,642 windows=   104,325 high_order_entropy= 1.202 elapsed= 1137.2s mops_s=  0.75
+[report] instructions= 855,005,494 windows=   104,938 high_order_entropy= 1.207 elapsed= 1143.8s mops_s=  0.75
+[report] instructions= 860,006,076 windows=   105,552 high_order_entropy= 1.210 elapsed= 1150.3s mops_s=  0.75
+[report] instructions= 865,003,145 windows=   106,165 high_order_entropy= 1.208 elapsed= 1156.9s mops_s=  0.75
+[report] instructions= 870,002,667 windows=   106,783 high_order_entropy= 1.202 elapsed= 1163.5s mops_s=  0.75
+[report] instructions= 875,004,183 windows=   107,400 high_order_entropy= 1.200 elapsed= 1170.2s mops_s=  0.75
+[report] instructions= 880,002,331 windows=   108,013 high_order_entropy= 1.205 elapsed= 1176.7s mops_s=  0.75
+[report] instructions= 885,004,193 windows=   108,625 high_order_entropy= 1.203 elapsed= 1183.2s mops_s=  0.75
+[report] instructions= 890,002,490 windows=   109,243 high_order_entropy= 1.198 elapsed= 1189.9s mops_s=  0.75
+[report] instructions= 895,000,046 windows=   109,858 high_order_entropy= 1.191 elapsed= 1196.5s mops_s=  0.75
+[report] instructions= 900,003,006 windows=   110,472 high_order_entropy= 1.206 elapsed= 1203.0s mops_s=  0.75
+[report] instructions= 905,005,304 windows=   111,084 high_order_entropy= 1.214 elapsed= 1209.5s mops_s=  0.75
+[report] instructions= 910,004,095 windows=   111,696 high_order_entropy= 1.223 elapsed= 1215.9s mops_s=  0.75
+[report] instructions= 915,007,881 windows=   112,310 high_order_entropy= 1.231 elapsed= 1222.4s mops_s=  0.75
+[report] instructions= 920,001,857 windows=   112,928 high_order_entropy= 1.235 elapsed= 1229.2s mops_s=  0.75
+[report] instructions= 925,007,150 windows=   113,543 high_order_entropy= 1.235 elapsed= 1235.8s mops_s=  0.75
+[report] instructions= 930,001,055 windows=   114,154 high_order_entropy= 1.243 elapsed= 1242.3s mops_s=  0.75
+[report] instructions= 935,007,405 windows=   114,775 high_order_entropy= 1.244 elapsed= 1249.1s mops_s=  0.75
+[report] instructions= 940,005,215 windows=   115,388 high_order_entropy= 1.243 elapsed= 1255.7s mops_s=  0.75
+[report] instructions= 945,003,182 windows=   116,005 high_order_entropy= 1.246 elapsed= 1262.3s mops_s=  0.75
+[report] instructions= 950,001,119 windows=   116,620 high_order_entropy= 1.237 elapsed= 1268.9s mops_s=  0.75
+[report] instructions= 955,003,362 windows=   117,241 high_order_entropy= 1.217 elapsed= 1275.6s mops_s=  0.75
+[report] instructions= 960,001,572 windows=   117,854 high_order_entropy= 1.216 elapsed= 1282.1s mops_s=  0.75
+[report] instructions= 965,004,049 windows=   118,467 high_order_entropy= 1.207 elapsed= 1288.7s mops_s=  0.75
+[report] instructions= 970,006,249 windows=   119,084 high_order_entropy= 1.201 elapsed= 1295.2s mops_s=  0.75
+[report] instructions= 975,005,486 windows=   119,695 high_order_entropy= 1.197 elapsed= 1301.7s mops_s=  0.75
+[report] instructions= 980,004,859 windows=   120,310 high_order_entropy= 1.182 elapsed= 1308.2s mops_s=  0.75
+[report] instructions= 985,004,240 windows=   120,926 high_order_entropy= 1.166 elapsed= 1314.8s mops_s=  0.75
+[report] instructions= 990,002,539 windows=   121,543 high_order_entropy= 1.149 elapsed= 1321.4s mops_s=  0.75
+[report] instructions= 995,003,319 windows=   122,161 high_order_entropy= 1.131 elapsed= 1328.1s mops_s=  0.75
+[report] instructions=1,000,002,394 windows=   122,783 high_order_entropy= 1.116 elapsed= 1334.9s mops_s=  0.75
+[report] instructions=1,005,001,959 windows=   123,399 high_order_entropy= 1.107 elapsed= 1341.5s mops_s=  0.75
+[report] instructions=1,010,001,535 windows=   124,017 high_order_entropy= 1.107 elapsed= 1348.2s mops_s=  0.75
+[report] instructions=1,015,006,554 windows=   124,632 high_order_entropy= 1.096 elapsed= 1354.9s mops_s=  0.75
+[report] instructions=1,020,004,847 windows=   125,247 high_order_entropy= 1.076 elapsed= 1361.5s mops_s=  0.75
+[report] instructions=1,025,006,174 windows=   125,862 high_order_entropy= 1.064 elapsed= 1368.2s mops_s=  0.75
+[report] instructions=1,030,001,407 windows=   126,477 high_order_entropy= 1.062 elapsed= 1374.8s mops_s=  0.75
+[report] instructions=1,035,000,612 windows=   127,094 high_order_entropy= 1.035 elapsed= 1381.4s mops_s=  0.75
+[report] instructions=1,040,005,845 windows=   127,710 high_order_entropy= 1.021 elapsed= 1388.1s mops_s=  0.75
+[report] instructions=1,045,001,255 windows=   128,324 high_order_entropy= 1.009 elapsed= 1394.7s mops_s=  0.75
+[report] instructions=1,050,000,989 windows=   128,939 high_order_entropy= 1.006 elapsed= 1401.3s mops_s=  0.75
+[report] instructions=1,055,000,071 windows=   129,551 high_order_entropy= 1.002 elapsed= 1407.9s mops_s=  0.75
+[report] instructions=1,060,003,380 windows=   130,167 high_order_entropy= 0.991 elapsed= 1414.6s mops_s=  0.75
+[report] instructions=1,065,000,290 windows=   130,784 high_order_entropy= 0.998 elapsed= 1421.2s mops_s=  0.75
+[report] instructions=1,070,004,011 windows=   131,400 high_order_entropy= 1.002 elapsed= 1427.9s mops_s=  0.75
+[report] instructions=1,075,003,380 windows=   132,020 high_order_entropy= 0.998 elapsed= 1434.5s mops_s=  0.75
+[report] instructions=1,080,007,828 windows=   132,637 high_order_entropy= 0.990 elapsed= 1441.0s mops_s=  0.75
+[report] instructions=1,085,006,633 windows=   133,251 high_order_entropy= 0.987 elapsed= 1447.5s mops_s=  0.75
+[report] instructions=1,090,002,488 windows=   133,866 high_order_entropy= 0.983 elapsed= 1454.0s mops_s=  0.75
+[report] instructions=1,095,002,398 windows=   134,480 high_order_entropy= 0.980 elapsed= 1460.5s mops_s=  0.75
+[report] instructions=1,100,000,441 windows=   135,099 high_order_entropy= 0.985 elapsed= 1467.1s mops_s=  0.75
+[report] instructions=1,105,002,084 windows=   135,716 high_order_entropy= 0.993 elapsed= 1473.6s mops_s=  0.75
+[report] instructions=1,110,003,923 windows=   136,332 high_order_entropy= 0.995 elapsed= 1480.1s mops_s=  0.75
+[report] instructions=1,115,007,053 windows=   136,947 high_order_entropy= 0.998 elapsed= 1486.6s mops_s=  0.75
+[report] instructions=1,120,000,682 windows=   137,563 high_order_entropy= 0.997 elapsed= 1493.1s mops_s=  0.75
+[report] instructions=1,125,004,409 windows=   138,180 high_order_entropy= 0.989 elapsed= 1499.6s mops_s=  0.75
+[report] instructions=1,130,004,643 windows=   138,796 high_order_entropy= 0.986 elapsed= 1506.1s mops_s=  0.75
+[report] instructions=1,135,001,387 windows=   139,411 high_order_entropy= 0.979 elapsed= 1512.5s mops_s=  0.75
+[report] instructions=1,140,001,191 windows=   140,029 high_order_entropy= 0.978 elapsed= 1519.0s mops_s=  0.75
+[report] instructions=1,145,007,824 windows=   140,645 high_order_entropy= 0.974 elapsed= 1525.5s mops_s=  0.75
+[report] instructions=1,150,007,637 windows=   141,259 high_order_entropy= 0.972 elapsed= 1531.9s mops_s=  0.75
+[report] instructions=1,155,005,126 windows=   141,874 high_order_entropy= 0.970 elapsed= 1538.3s mops_s=  0.75
+[report] instructions=1,160,006,005 windows=   142,491 high_order_entropy= 0.967 elapsed= 1544.8s mops_s=  0.75
+[report] instructions=1,165,001,863 windows=   143,111 high_order_entropy= 0.963 elapsed= 1551.4s mops_s=  0.75
+[report] instructions=1,170,003,233 windows=   143,728 high_order_entropy= 0.978 elapsed= 1557.8s mops_s=  0.75
+[report] instructions=1,175,004,833 windows=   144,342 high_order_entropy= 0.995 elapsed= 1564.3s mops_s=  0.75
+[report] instructions=1,180,002,381 windows=   144,953 high_order_entropy= 0.983 elapsed= 1570.6s mops_s=  0.75
+[report] instructions=1,185,002,473 windows=   145,564 high_order_entropy= 0.973 elapsed= 1576.9s mops_s=  0.75
+[report] instructions=1,190,006,820 windows=   146,180 high_order_entropy= 0.973 elapsed= 1583.4s mops_s=  0.75
+[report] instructions=1,195,003,246 windows=   146,791 high_order_entropy= 0.970 elapsed= 1589.9s mops_s=  0.75
+[report] instructions=1,200,000,366 windows=   147,401 high_order_entropy= 0.972 elapsed= 1596.4s mops_s=  0.75
+[report] instructions=1,205,006,583 windows=   148,014 high_order_entropy= 0.972 elapsed= 1602.7s mops_s=  0.75
+[report] instructions=1,210,003,703 windows=   148,624 high_order_entropy= 0.970 elapsed= 1609.1s mops_s=  0.75
+[report] instructions=1,215,003,543 windows=   149,236 high_order_entropy= 0.967 elapsed= 1615.5s mops_s=  0.75
+[report] instructions=1,220,000,758 windows=   149,847 high_order_entropy= 0.969 elapsed= 1621.9s mops_s=  0.75
+[report] instructions=1,225,006,070 windows=   150,458 high_order_entropy= 0.968 elapsed= 1628.4s mops_s=  0.75
+[report] instructions=1,230,003,190 windows=   151,068 high_order_entropy= 0.970 elapsed= 1634.6s mops_s=  0.75
+[report] instructions=1,235,000,850 windows=   151,679 high_order_entropy= 0.970 elapsed= 1641.2s mops_s=  0.75
+[report] instructions=1,240,006,355 windows=   152,291 high_order_entropy= 0.967 elapsed= 1647.9s mops_s=  0.75
+[report] instructions=1,245,000,576 windows=   152,903 high_order_entropy= 0.966 elapsed= 1654.4s mops_s=  0.75
+[report] instructions=1,250,005,452 windows=   153,516 high_order_entropy= 0.960 elapsed= 1661.2s mops_s=  0.75
+[report] instructions=1,255,003,333 windows=   154,127 high_order_entropy= 0.956 elapsed= 1667.8s mops_s=  0.75
+[report] instructions=1,260,000,453 windows=   154,737 high_order_entropy= 0.954 elapsed= 1674.8s mops_s=  0.75
+[report] instructions=1,265,001,392 windows=   155,349 high_order_entropy= 0.953 elapsed= 1681.3s mops_s=  0.75
+[report] instructions=1,270,007,343 windows=   155,962 high_order_entropy= 0.957 elapsed= 1687.8s mops_s=  0.75
+[report] instructions=1,275,002,360 windows=   156,574 high_order_entropy= 0.957 elapsed= 1694.3s mops_s=  0.75
+[report] instructions=1,280,007,672 windows=   157,185 high_order_entropy= 0.961 elapsed= 1700.8s mops_s=  0.75
+[report] instructions=1,285,007,959 windows=   157,797 high_order_entropy= 0.961 elapsed= 1707.3s mops_s=  0.75
+[report] instructions=1,290,005,208 windows=   158,408 high_order_entropy= 0.962 elapsed= 1713.8s mops_s=  0.75
+[report] instructions=1,295,001,857 windows=   159,022 high_order_entropy= 0.959 elapsed= 1720.5s mops_s=  0.75
+[report] instructions=1,300,001,735 windows=   159,636 high_order_entropy= 0.955 elapsed= 1727.2s mops_s=  0.75
+[report] instructions=1,305,004,916 windows=   160,248 high_order_entropy= 0.958 elapsed= 1733.8s mops_s=  0.75
+[report] instructions=1,310,007,199 windows=   160,861 high_order_entropy= 0.961 elapsed= 1740.4s mops_s=  0.75
+[report] instructions=1,315,008,143 windows=   161,474 high_order_entropy= 0.964 elapsed= 1747.7s mops_s=  0.75
+[report] instructions=1,320,006,048 windows=   162,088 high_order_entropy= 0.970 elapsed= 1754.3s mops_s=  0.75
+[report] instructions=1,325,007,229 windows=   162,700 high_order_entropy= 0.972 elapsed= 1760.8s mops_s=  0.75
+[report] instructions=1,330,001,828 windows=   163,311 high_order_entropy= 0.978 elapsed= 1767.4s mops_s=  0.75
+[report] instructions=1,335,003,751 windows=   163,922 high_order_entropy= 0.980 elapsed= 1773.7s mops_s=  0.75
+[report] instructions=1,340,000,621 windows=   164,534 high_order_entropy= 0.984 elapsed= 1780.0s mops_s=  0.75
+[report] instructions=1,345,001,845 windows=   165,149 high_order_entropy= 0.988 elapsed= 1786.6s mops_s=  0.75
+[report] instructions=1,350,007,798 windows=   165,761 high_order_entropy= 0.988 elapsed= 1793.0s mops_s=  0.75
+[report] instructions=1,355,004,157 windows=   166,374 high_order_entropy= 0.987 elapsed= 1799.5s mops_s=  0.75
+[report] instructions=1,360,007,954 windows=   166,989 high_order_entropy= 0.984 elapsed= 1806.4s mops_s=  0.75
+[report] instructions=1,365,001,758 windows=   167,600 high_order_entropy= 0.985 elapsed= 1813.0s mops_s=  0.75
+[report] instructions=1,370,001,566 windows=   168,213 high_order_entropy= 0.982 elapsed= 1819.7s mops_s=  0.75
+[report] instructions=1,375,003,695 windows=   168,826 high_order_entropy= 0.980 elapsed= 1826.2s mops_s=  0.75
+[report] instructions=1,380,003,560 windows=   169,439 high_order_entropy= 0.978 elapsed= 1832.8s mops_s=  0.75
+[report] instructions=1,385,003,627 windows=   170,054 high_order_entropy= 0.979 elapsed= 1839.8s mops_s=  0.75
+[report] instructions=1,390,006,877 windows=   170,666 high_order_entropy= 0.979 elapsed= 1846.5s mops_s=  0.75
+[report] instructions=1,395,004,449 windows=   171,279 high_order_entropy= 0.976 elapsed= 1853.2s mops_s=  0.75
+[report] instructions=1,400,001,840 windows=   171,895 high_order_entropy= 0.974 elapsed= 1859.9s mops_s=  0.75
+[report] instructions=1,405,006,445 windows=   172,510 high_order_entropy= 0.967 elapsed= 1866.7s mops_s=  0.75
+[report] instructions=1,410,001,347 windows=   173,125 high_order_entropy= 0.961 elapsed= 1873.4s mops_s=  0.75
+[report] instructions=1,415,004,139 windows=   173,741 high_order_entropy= 0.956 elapsed= 1880.3s mops_s=  0.75
+[report] instructions=1,420,002,226 windows=   174,352 high_order_entropy= 0.952 elapsed= 1887.1s mops_s=  0.75
+[report] instructions=1,425,005,421 windows=   174,964 high_order_entropy= 0.948 elapsed= 1893.8s mops_s=  0.75
+[report] instructions=1,430,007,374 windows=   175,579 high_order_entropy= 0.947 elapsed= 1900.7s mops_s=  0.75
+[report] instructions=1,435,006,221 windows=   176,194 high_order_entropy= 0.948 elapsed= 1907.7s mops_s=  0.75
+[report] instructions=1,440,003,084 windows=   176,806 high_order_entropy= 0.938 elapsed= 1914.6s mops_s=  0.75
+[report] instructions=1,445,002,501 windows=   177,417 high_order_entropy= 0.927 elapsed= 1921.0s mops_s=  0.75
+[report] instructions=1,450,001,368 windows=   178,031 high_order_entropy= 0.919 elapsed= 1927.5s mops_s=  0.75
+[report] instructions=1,455,002,550 windows=   178,643 high_order_entropy= 0.911 elapsed= 1934.2s mops_s=  0.75
+[report] instructions=1,460,007,230 windows=   179,255 high_order_entropy= 0.902 elapsed= 1940.9s mops_s=  0.75
+[report] instructions=1,465,002,289 windows=   179,867 high_order_entropy= 0.892 elapsed= 1947.7s mops_s=  0.75
+[report] instructions=1,470,002,209 windows=   180,479 high_order_entropy= 0.888 elapsed= 1954.3s mops_s=  0.75
+[report] instructions=1,475,003,299 windows=   181,096 high_order_entropy= 0.886 elapsed= 1961.0s mops_s=  0.75
+[report] instructions=1,480,001,449 windows=   181,711 high_order_entropy= 0.878 elapsed= 1967.7s mops_s=  0.75
+[report] instructions=1,485,002,387 windows=   182,323 high_order_entropy= 0.881 elapsed= 1974.3s mops_s=  0.75
+[report] instructions=1,490,007,308 windows=   182,936 high_order_entropy= 0.877 elapsed= 1980.9s mops_s=  0.75
+[report] instructions=1,495,000,276 windows=   183,546 high_order_entropy= 0.878 elapsed= 1987.4s mops_s=  0.75
+[report] instructions=1,500,006,997 windows=   184,164 high_order_entropy= 0.875 elapsed= 1994.0s mops_s=  0.75
+[report] instructions=1,505,006,515 windows=   184,783 high_order_entropy= 0.879 elapsed= 2000.8s mops_s=  0.75
+[report] instructions=1,510,004,562 windows=   185,398 high_order_entropy= 0.884 elapsed= 2007.7s mops_s=  0.75
+[report] instructions=1,515,000,442 windows=   186,011 high_order_entropy= 0.883 elapsed= 2014.3s mops_s=  0.75
+[report] instructions=1,520,002,953 windows=   186,627 high_order_entropy= 0.879 elapsed= 2021.0s mops_s=  0.75
+[report] instructions=1,525,006,657 windows=   187,243 high_order_entropy= 0.881 elapsed= 2027.7s mops_s=  0.75
+[report] instructions=1,530,006,520 windows=   187,859 high_order_entropy= 0.878 elapsed= 2034.5s mops_s=  0.75
+[report] instructions=1,535,005,840 windows=   188,471 high_order_entropy= 0.879 elapsed= 2041.1s mops_s=  0.75
+[report] instructions=1,540,000,451 windows=   189,085 high_order_entropy= 0.881 elapsed= 2047.6s mops_s=  0.75
+[report] instructions=1,545,006,145 windows=   189,702 high_order_entropy= 0.886 elapsed= 2054.3s mops_s=  0.75
+[report] instructions=1,550,002,600 windows=   190,315 high_order_entropy= 0.885 elapsed= 2060.9s mops_s=  0.75
+[report] instructions=1,555,005,185 windows=   190,929 high_order_entropy= 0.885 elapsed= 2067.8s mops_s=  0.75
+[report] instructions=1,560,003,051 windows=   191,544 high_order_entropy= 0.893 elapsed= 2074.4s mops_s=  0.75
+[report] instructions=1,565,004,334 windows=   192,158 high_order_entropy= 0.891 elapsed= 2081.0s mops_s=  0.75
+[report] instructions=1,570,004,533 windows=   192,770 high_order_entropy= 0.896 elapsed= 2088.1s mops_s=  0.75
+[report] instructions=1,575,005,407 windows=   193,389 high_order_entropy= 0.889 elapsed= 2094.7s mops_s=  0.75
+[report] instructions=1,580,002,527 windows=   193,999 high_order_entropy= 0.880 elapsed= 2101.2s mops_s=  0.75
+[report] instructions=1,585,003,588 windows=   194,612 high_order_entropy= 0.882 elapsed= 2107.8s mops_s=  0.75
+[report] instructions=1,590,002,204 windows=   195,224 high_order_entropy= 0.877 elapsed= 2114.6s mops_s=  0.75
+[report] instructions=1,595,001,004 windows=   195,839 high_order_entropy= 0.871 elapsed= 2121.0s mops_s=  0.75
+[report] instructions=1,600,000,335 windows=   196,454 high_order_entropy= 0.865 elapsed= 2127.9s mops_s=  0.75
+[report] instructions=1,605,000,798 windows=   197,069 high_order_entropy= 0.860 elapsed= 2134.6s mops_s=  0.75
+[report] instructions=1,610,007,767 windows=   197,681 high_order_entropy= 0.857 elapsed= 2141.1s mops_s=  0.75
+[report] instructions=1,615,006,093 windows=   198,296 high_order_entropy= 0.852 elapsed= 2147.7s mops_s=  0.75
+[report] instructions=1,620,003,409 windows=   198,910 high_order_entropy= 0.842 elapsed= 2154.1s mops_s=  0.75
+[report] instructions=1,625,003,631 windows=   199,528 high_order_entropy= 0.837 elapsed= 2160.7s mops_s=  0.75
+[report] instructions=1,630,000,636 windows=   200,141 high_order_entropy= 0.836 elapsed= 2167.1s mops_s=  0.75
+[report] instructions=1,635,001,102 windows=   200,757 high_order_entropy= 0.833 elapsed= 2173.7s mops_s=  0.75
+[report] instructions=1,640,005,948 windows=   201,372 high_order_entropy= 0.827 elapsed= 2180.1s mops_s=  0.75
+[report] instructions=1,645,007,793 windows=   201,985 high_order_entropy= 0.823 elapsed= 2186.5s mops_s=  0.75
+[report] instructions=1,650,004,535 windows=   202,597 high_order_entropy= 0.816 elapsed= 2192.9s mops_s=  0.75
+[report] instructions=1,655,000,965 windows=   203,215 high_order_entropy= 0.815 elapsed= 2199.5s mops_s=  0.75
+[report] instructions=1,660,002,465 windows=   203,829 high_order_entropy= 0.815 elapsed= 2205.9s mops_s=  0.75
+[report] instructions=1,665,003,007 windows=   204,442 high_order_entropy= 0.814 elapsed= 2212.4s mops_s=  0.75
+[report] instructions=1,670,001,103 windows=   205,058 high_order_entropy= 0.810 elapsed= 2218.9s mops_s=  0.75
+[report] instructions=1,675,000,912 windows=   205,672 high_order_entropy= 0.810 elapsed= 2225.4s mops_s=  0.75
+[report] instructions=1,680,003,931 windows=   206,285 high_order_entropy= 0.811 elapsed= 2231.9s mops_s=  0.75
+[report] instructions=1,685,000,218 windows=   206,898 high_order_entropy= 0.812 elapsed= 2238.3s mops_s=  0.75
+[report] instructions=1,690,003,836 windows=   207,514 high_order_entropy= 0.811 elapsed= 2244.9s mops_s=  0.75
+[report] instructions=1,695,007,749 windows=   208,129 high_order_entropy= 0.808 elapsed= 2251.4s mops_s=  0.75
+[report] instructions=1,700,003,715 windows=   208,741 high_order_entropy= 0.806 elapsed= 2257.9s mops_s=  0.75
+[report] instructions=1,705,005,276 windows=   209,355 high_order_entropy= 0.804 elapsed= 2264.4s mops_s=  0.75
+[report] instructions=1,710,004,318 windows=   209,969 high_order_entropy= 0.803 elapsed= 2270.9s mops_s=  0.75
+[report] instructions=1,715,004,204 windows=   210,581 high_order_entropy= 0.803 elapsed= 2277.3s mops_s=  0.75
+[report] instructions=1,720,006,385 windows=   211,194 high_order_entropy= 0.801 elapsed= 2283.9s mops_s=  0.75
+[report] instructions=1,725,005,630 windows=   211,813 high_order_entropy= 0.799 elapsed= 2290.6s mops_s=  0.75
+[report] instructions=1,730,006,169 windows=   212,430 high_order_entropy= 0.789 elapsed= 2297.2s mops_s=  0.75
+[report] instructions=1,735,001,337 windows=   213,042 high_order_entropy= 0.780 elapsed= 2303.7s mops_s=  0.75
+[report] instructions=1,740,003,751 windows=   213,657 high_order_entropy= 0.786 elapsed= 2310.3s mops_s=  0.75
+[report] instructions=1,745,005,454 windows=   214,270 high_order_entropy= 0.780 elapsed= 2317.0s mops_s=  0.75
+[report] instructions=1,750,001,373 windows=   214,882 high_order_entropy= 0.780 elapsed= 2323.6s mops_s=  0.75
+[report] instructions=1,755,002,790 windows=   215,497 high_order_entropy= 0.768 elapsed= 2330.2s mops_s=  0.75
+[report] instructions=1,760,001,858 windows=   216,109 high_order_entropy= 0.767 elapsed= 2336.7s mops_s=  0.75
+[report] instructions=1,765,003,067 windows=   216,723 high_order_entropy= 0.765 elapsed= 2343.2s mops_s=  0.75
+[report] instructions=1,770,002,466 windows=   217,334 high_order_entropy= 0.760 elapsed= 2349.6s mops_s=  0.75
+[report] instructions=1,775,008,063 windows=   217,947 high_order_entropy= 0.760 elapsed= 2356.1s mops_s=  0.75
+[report] instructions=1,780,002,810 windows=   218,559 high_order_entropy= 0.755 elapsed= 2362.6s mops_s=  0.75
+[report] instructions=1,785,008,122 windows=   219,170 high_order_entropy= 0.754 elapsed= 2368.9s mops_s=  0.75
+[report] instructions=1,790,007,328 windows=   219,781 high_order_entropy= 0.751 elapsed= 2375.2s mops_s=  0.75
+[report] instructions=1,795,007,934 windows=   220,392 high_order_entropy= 0.749 elapsed= 2381.6s mops_s=  0.75
+[report] instructions=1,800,006,100 windows=   221,004 high_order_entropy= 0.744 elapsed= 2388.1s mops_s=  0.75
+[report] instructions=1,805,003,220 windows=   221,614 high_order_entropy= 0.736 elapsed= 2394.4s mops_s=  0.75
+[report] instructions=1,810,001,765 windows=   222,225 high_order_entropy= 0.734 elapsed= 2400.8s mops_s=  0.75
+[report] instructions=1,815,004,405 windows=   222,838 high_order_entropy= 0.729 elapsed= 2407.3s mops_s=  0.75
+[report] instructions=1,820,007,619 windows=   223,450 high_order_entropy= 0.727 elapsed= 2413.7s mops_s=  0.75
+[report] instructions=1,825,001,438 windows=   224,061 high_order_entropy= 0.727 elapsed= 2420.0s mops_s=  0.75
+[report] instructions=1,830,006,750 windows=   224,672 high_order_entropy= 0.721 elapsed= 2426.3s mops_s=  0.75
+[report] instructions=1,835,002,452 windows=   225,283 high_order_entropy= 0.719 elapsed= 2432.6s mops_s=  0.75
+[report] instructions=1,840,002,089 windows=   225,894 high_order_entropy= 0.721 elapsed= 2439.0s mops_s=  0.75
+[report] instructions=1,845,005,222 windows=   226,506 high_order_entropy= 0.723 elapsed= 2445.3s mops_s=  0.75
+[report] instructions=1,850,006,316 windows=   227,117 high_order_entropy= 0.720 elapsed= 2451.7s mops_s=  0.75
+[report] instructions=1,855,003,869 windows=   227,730 high_order_entropy= 0.726 elapsed= 2458.0s mops_s=  0.75
+[report] instructions=1,860,000,989 windows=   228,340 high_order_entropy= 0.725 elapsed= 2464.3s mops_s=  0.75
+[report] instructions=1,865,006,301 windows=   228,951 high_order_entropy= 0.724 elapsed= 2470.5s mops_s=  0.75
+[report] instructions=1,870,003,421 windows=   229,561 high_order_entropy= 0.725 elapsed= 2476.9s mops_s=  0.75
+[report] instructions=1,875,000,762 windows=   230,172 high_order_entropy= 0.721 elapsed= 2483.2s mops_s=  0.76
+[report] instructions=1,880,006,074 windows=   230,783 high_order_entropy= 0.718 elapsed= 2489.6s mops_s=  0.76
+[report] instructions=1,885,004,302 windows=   231,394 high_order_entropy= 0.715 elapsed= 2496.0s mops_s=  0.76
+[report] instructions=1,890,001,422 windows=   232,004 high_order_entropy= 0.710 elapsed= 2502.4s mops_s=  0.76
+[report] instructions=1,895,002,196 windows=   232,615 high_order_entropy= 0.711 elapsed= 2508.8s mops_s=  0.76
+[report] instructions=1,900,005,679 windows=   233,227 high_order_entropy= 0.703 elapsed= 2515.1s mops_s=  0.76
+[report] instructions=1,905,002,799 windows=   233,837 high_order_entropy= 0.704 elapsed= 2521.4s mops_s=  0.76
+[report] instructions=1,910,008,111 windows=   234,448 high_order_entropy= 0.706 elapsed= 2527.7s mops_s=  0.76
+[report] instructions=1,915,006,313 windows=   235,059 high_order_entropy= 0.722 elapsed= 2534.0s mops_s=  0.76
+[report] instructions=1,920,003,433 windows=   235,669 high_order_entropy= 0.718 elapsed= 2540.3s mops_s=  0.76
+[report] instructions=1,925,003,337 windows=   236,280 high_order_entropy= 0.716 elapsed= 2546.6s mops_s=  0.76
+[report] instructions=1,930,005,711 windows=   236,891 high_order_entropy= 0.725 elapsed= 2552.9s mops_s=  0.76
+[report] instructions=1,935,005,387 windows=   237,503 high_order_entropy= 0.723 elapsed= 2559.2s mops_s=  0.76
+[report] instructions=1,940,003,496 windows=   238,114 high_order_entropy= 0.731 elapsed= 2565.5s mops_s=  0.76
+[report] instructions=1,945,003,819 windows=   238,726 high_order_entropy= 0.733 elapsed= 2571.7s mops_s=  0.76
+[report] instructions=1,950,003,642 windows=   239,337 high_order_entropy= 0.738 elapsed= 2578.0s mops_s=  0.76
+[report] instructions=1,955,007,663 windows=   239,948 high_order_entropy= 0.741 elapsed= 2584.3s mops_s=  0.76
+[report] instructions=1,960,001,922 windows=   240,558 high_order_entropy= 0.743 elapsed= 2590.6s mops_s=  0.76
+[report] instructions=1,965,007,234 windows=   241,169 high_order_entropy= 0.749 elapsed= 2596.8s mops_s=  0.76
+[report] instructions=1,970,004,354 windows=   241,779 high_order_entropy= 0.748 elapsed= 2603.1s mops_s=  0.76
+[report] instructions=1,975,001,474 windows=   242,389 high_order_entropy= 0.748 elapsed= 2609.4s mops_s=  0.76
+[report] instructions=1,980,006,786 windows=   243,000 high_order_entropy= 0.753 elapsed= 2615.8s mops_s=  0.76
+[report] instructions=1,985,003,906 windows=   243,610 high_order_entropy= 0.754 elapsed= 2622.1s mops_s=  0.76
+[report] instructions=1,990,001,026 windows=   244,220 high_order_entropy= 0.752 elapsed= 2628.3s mops_s=  0.76
+[report] instructions=1,995,006,338 windows=   244,831 high_order_entropy= 0.750 elapsed= 2634.6s mops_s=  0.76
+[report] instructions=2,000,003,458 windows=   245,441 high_order_entropy= 0.745 elapsed= 2640.8s mops_s=  0.76
+[info] state transition detected at 45,004,198 instructions (high_order_entropy > 1.0)
+[info] log up to date at longtape_results/seed1/seed1_2000000000instr.jsonl (401 records total)
+[info] final checkpoint written to longtape_results/seed1/seed1_2000000000instr_ckpt.dat (resume with --resume-from longtape_results/seed1/seed1_2000000000instr_ckpt.dat)
+[info] plot written to longtape_results/seed1/seed1_2000000000instr.png
