@@ -1,0 +1,25 @@
+steps: 20, terminated by: end of tape
+   1 |ab0{{{[.>}]00000| ip  0 head0  0 head1  0
+   2 |ab0{{{[.>}]00000| ip  1 head0  0 head1  0
+   3 |ab0{{{[.>}]00000| ip  2 head0  0 head1  0
+   4 |ab0{{{[.>}]00000| ip  3 head0  0 head1  0
+   5 |ab0{{{[.>}]00000| ip  4 head0  0 head1 15
+   6 |ab0{{{[.>}]00000| ip  5 head0  0 head1 14
+   7 |ab0{{{[.>}]00000| ip  6 head0  0 head1 13
+   8 |ab0{{{[.>}]00000| ip  7 head0  0 head1 13
+   9 |ab0{{{[.>}]00a00| ip  8 head0  0 head1 13
+  10 |ab0{{{[.>}]00a00| ip  9 head0  1 head1 13
+  11 |ab0{{{[.>}]00a00| ip 10 head0  1 head1 14
+  12 |ab0{{{[.>}]00a00| ip  7 head0  1 head1 14
+  13 |ab0{{{[.>}]00ab0| ip  8 head0  1 head1 14
+  14 |ab0{{{[.>}]00ab0| ip  9 head0  2 head1 14
+  15 |ab0{{{[.>}]00ab0| ip 10 head0  2 head1 15
+  16 |ab0{{{[.>}]00ab0| ip 11 head0  2 head1 15
+  17 |ab0{{{[.>}]00ab0| ip 12 head0  2 head1 15
+  18 |ab0{{{[.>}]00ab0| ip 13 head0  2 head1 15
+  19 |ab0{{{[.>}]00ab0| ip 14 head0  2 head1 15
+  20 |ab0{{{[.>}]00ab0| ip 15 head0  2 head1 15
+ end |ab0{{{[.>}]00ab0| ip 16 head0  2 head1 15
+same states as plot_fig4.trace_execution: True (132 steps)
+tapes identical to the engine's after each step: 132/132
+written images/bff_example.pdf

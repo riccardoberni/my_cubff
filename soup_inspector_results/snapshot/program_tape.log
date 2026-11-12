@@ -1,0 +1,9 @@
+A: program 0 at epoch 4001: |         {   [ }<    ,]<       .    }     .        ],    <} [{  |
+B: program 1 at epoch 0: |                    -                           ]               |
+written images/program_tape.pdf
+interaction: 8192 steps, terminated by: step limit
+A  |         {   [ }<    ,]<       .    }     .        ],    <} [{  | score 64
+B  |                    -                           ]               | score 0
+A' |         {   [ }<    ,]<       .    }     .        ],    <} [{  | score 64
+B' |  {[ }<    ,]        .     }    .       <],    <} [   {         | score 64
+written images/interaction_example.pdf
