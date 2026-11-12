@@ -1,6 +1,9 @@
 A: program 0 at epoch 4001: |         {   [ }<    ,]<       .    }     .        ],    <} [{  |
 B: program 1 at epoch 0: |                    -                           ]               |
 written images/program_tape.pdf
+long tape: longtape_results/seed3/tape_dumps_seed3/tape_000050002267.bin, 65536 cells, after 50,002,267 executed instructions
+cells 21312-21439: |                        }  [   [  [   [  [   [  [   [  [   [  [ [ [  [ [ [  [][ [  [][ [  [][ [  [][ ]  ] [ ]  ] [ ]  ] [ ]  ] ]|
+written images/longtape_excerpt.pdf
 interaction: 8192 steps, terminated by: step limit
 A  |         {   [ }<    ,]<       .    }     .        ],    <} [{  | score 64
 B  |                    -                           ]               | score 0

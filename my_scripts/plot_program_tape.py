@@ -7,8 +7,11 @@ Two example figures for the terminology of Chapter 4, drawn from the
 programs saved by soup_snapshot.py (run of seed 171):
 
   1. program and tape: two programs, drawn above the 128-cell tape obtained
-     by concatenating them;
-  2. interaction: a self-replicator taken from the soup after the state
+     by concatenating them, as in the primordial soup;
+  2. long tape: an excerpt of 128 cells of a long tape (Experiments 6 and
+     7), read from one of the tape dumps written by long_tape_bff.py and
+     shown under a bar that represents the whole tape;
+  3. interaction: a self-replicator taken from the soup after the state
      transition (program A) is concatenated with a program of the initial
      soup (program B), the tape is executed, and the result is split back
      into two programs. The same two programs are used in both figures.
@@ -27,6 +30,7 @@ Usage:
     python3 my_scripts/plot_program_tape.py \
         --data soup_inspector_results/snapshot/seed171_snapshot.npz \
         --out-tape images/program_tape.pdf \
+        --out-longtape images/longtape_excerpt.pdf \
         --out-interaction images/interaction_example.pdf
 """
 
@@ -98,25 +102,45 @@ def _cells(ax, x0, y, data, cell_w, cell_h, mono):
 
 
 def draw_rows(rows, out):
-    """rows: list of (label, kind, data, note, header). kind 'pair' draws
-    two 64-byte programs side by side, each above its half of the tape
-    (data = (first, second), header = (title1, title2) or None, note
-    unused); kind 'tape' draws a 128-cell tape with a dotted line between
-    the two halves and the note on its right."""
+    """rows: list of (label, kind, data, note, header).
+    kind 'title': a panel title (data unused, note = text);
+    kind 'pair': two 64-byte programs side by side, each above its half of
+        the tape (data = (first, second), header = (title1, title2) or None);
+    kind 'tape': a 128-cell tape with a dotted line between the two halves;
+    kind 'excerpt': a run of cells of a long tape (no boundary line);
+    kind 'overview': a bar standing for a whole long tape, with the excerpt
+        drawn in the next row marked on it (data = (start, length, size))."""
     total = 2 * TAPE_SIZE + GAP
     cell_w, cell_h = 1.0, 2.6
-    label_w, note_w = 17.0, 13.0
+    label_w, note_w = 17.0, 15.0
     width_in = 10.0
     unit = width_in / (label_w + total * cell_w + note_w)
-    heights = [(2.6 if r[1] == "pair" and r[4] else 1.6) for r in rows]
-    h_total = sum(heights) + 0.4
+
+    def height(r):
+        if r[1] == "title":
+            return 1.4
+        if r[1] == "pair" and r[4]:
+            return 2.6
+        if r[1] == "overview":
+            return 2.4
+        return 1.6
+
+    h_total = sum(height(r) for r in rows) + 0.4
     fig, ax = plt.subplots(figsize=(width_in, h_total * cell_h * unit))
     ax.set_xlim(-label_w, total * cell_w + note_w)
     ax.set_ylim(-h_total * cell_h, 0.2 * cell_h)
     ax.axis("off")
     mono = {"family": "DejaVu Sans Mono", "size": 7.0}
+    x_tape = GAP / 2           # left edge of a 128-cell tape
     y = 0.0
-    for (label, kind, data, note, header), h in zip(rows, heights):
+    for row in rows:
+        label, kind, data, note, header = row
+        h = height(row)
+        if kind == "title":
+            ax.text(-label_w, y - 0.6 * cell_h, note, ha="left",
+                    va="center", fontsize=8.5, fontweight="bold")
+            y -= h * cell_h
+            continue
         if kind == "pair":
             if header:
                 for k, text in enumerate(header):
@@ -125,21 +149,46 @@ def draw_rows(rows, out):
                             text, ha="center", va="center", fontsize=7.5,
                             color="0.25")
                 y -= 1.0 * cell_h
+                h -= 1.0
             for k, prog in enumerate(data):
                 _cells(ax, k * (TAPE_SIZE + GAP), y, prog, cell_w, cell_h,
                        mono)
+        elif kind == "overview":
+            start, length, size = data
+            width = 2 * TAPE_SIZE
+            ax.add_patch(Rectangle((x_tape * cell_w, y - 0.7 * cell_h),
+                                   width * cell_w, 0.7 * cell_h,
+                                   facecolor="0.92", edgecolor="0.6",
+                                   linewidth=0.4))
+            xs = x_tape + width * start / size
+            xe = x_tape + width * (start + length) / size
+            ax.add_patch(Rectangle((xs * cell_w, y - 0.7 * cell_h),
+                                   max(xe - xs, 0.4) * cell_w, 0.7 * cell_h,
+                                   facecolor="0.2", edgecolor="none"))
+            ax.text(x_tape * cell_w, y + 0.25 * cell_h, "cell 0", ha="left",
+                    va="bottom", fontsize=6.5, color="0.4")
+            ax.text((x_tape + width) * cell_w, y + 0.25 * cell_h,
+                    f"cell {size - 1:,}", ha="right", va="bottom",
+                    fontsize=6.5, color="0.4")
+            # zoom lines towards the excerpt drawn in the next row
+            for x_from, x_to in ((xs, x_tape), (xe, x_tape + width)):
+                ax.plot([x_from * cell_w, x_to * cell_w],
+                        [y - 0.7 * cell_h, y - h * cell_h],
+                        color="0.5", linewidth=0.5)
         else:
-            x0 = GAP / 2
-            _cells(ax, x0, y, data, cell_w, cell_h, mono)
-            ax.plot([(x0 + TAPE_SIZE) * cell_w] * 2,
-                    [y + 0.2 * cell_h, y - 1.2 * cell_h],
-                    color="0.3", linewidth=0.7, linestyle=":")
-            if note:
-                ax.text((total + 0.8) * cell_w, y - cell_h / 2, note,
-                        ha="left", va="center", fontsize=7.5, color="0.25")
-        ax.text(-0.8, y - cell_h / 2, label, ha="right", va="center",
-                fontsize=8)
-        y -= (h - (1.0 if kind == "pair" and header else 0.0)) * cell_h
+            _cells(ax, x_tape, y, data, cell_w, cell_h, mono)
+            if kind == "tape":
+                ax.plot([(x_tape + TAPE_SIZE) * cell_w] * 2,
+                        [y + 0.2 * cell_h, y - 1.2 * cell_h],
+                        color="0.3", linewidth=0.7, linestyle=":")
+        if note:
+            ax.text((total + 0.8) * cell_w,
+                    y - (0.35 if kind == "overview" else 0.5) * cell_h,
+                    note, ha="left", va="center", fontsize=7.5,
+                    color="0.25")
+        ax.text(-0.8, y - (0.35 if kind == "overview" else 0.5) * cell_h,
+                label, ha="right", va="center", fontsize=8)
+        y -= h * cell_h
     fig.savefig(out, bbox_inches="tight")
     print(f"written {out}")
 
@@ -153,13 +202,20 @@ def main():
     ap.add_argument("--replicator", type=int, default=0)
     ap.add_argument("--food-epoch", type=int, default=0)
     ap.add_argument("--food", type=int, default=1)
+    ap.add_argument("--longtape-dump",
+                    default="longtape_results/seed3/tape_dumps_seed3/"
+                    "tape_000050002267.bin",
+                    help="raw tape dump (.bin) written by long_tape_bff.py")
+    ap.add_argument("--longtape-start", type=int, default=21312,
+                    help="first cell of the excerpt of the long tape")
     ap.add_argument("--out-tape", default="images/program_tape.pdf")
+    ap.add_argument("--out-longtape", default="images/longtape_excerpt.pdf")
     ap.add_argument("--out-interaction",
                     default="images/interaction_example.pdf")
     ap.add_argument("--lang", default="bff_noheads")
     args = ap.parse_args()
     data = np.load(args.data)
-    for out in (args.out_tape, args.out_interaction):
+    for out in (args.out_tape, args.out_longtape, args.out_interaction):
         os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
 
     rep = program_at(data, args.replicator_epoch, args.replicator)
@@ -169,13 +225,32 @@ def main():
     print(f"B: program {args.food} at epoch {args.food_epoch}: "
           f"|{row_text(food)}|")
 
-    # 1. Program and tape.
+    # 1. Program and tape (primordial soup).
     draw_rows([("programs", "pair", (rep, food), None,
                 ("program A (64 cells)", "program B (64 cells)")),
                ("tape AB", "tape", rep + food, "128 cells", None)],
               args.out_tape)
 
-    # 2. Interaction.
+    # 2. Excerpt of a long tape.
+    long_tape = np.fromfile(args.longtape_dump, dtype=np.uint8)
+    length = 2 * TAPE_SIZE
+    start = args.longtape_start
+    if not 0 <= start <= len(long_tape) - length:
+        sys.exit(f"--longtape-start must be between 0 and "
+                 f"{len(long_tape) - length}")
+    excerpt = bytes(long_tape[start:start + length])
+    instructions = os.path.basename(args.longtape_dump).split("_")[-1]
+    instructions = int(os.path.splitext(instructions)[0])
+    print(f"long tape: {args.longtape_dump}, {len(long_tape)} cells, "
+          f"after {instructions:,} executed instructions")
+    print(f"cells {start}-{start + length - 1}: |{row_text(excerpt)}|")
+    draw_rows([("long tape", "overview", (start, length, len(long_tape)),
+                f"{len(long_tape):,} cells", None),
+               ("excerpt", "excerpt", excerpt,
+                f"cells {start:,}\u2013{start + length - 1:,}", None)],
+              args.out_longtape)
+
+    # 3. Interaction.
     states, reason = pbe.trace(rep + food, MAX_STEPS)
     after = states[-1][0]
     steps = len(states) - 1

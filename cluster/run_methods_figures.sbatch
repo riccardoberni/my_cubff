@@ -13,9 +13,11 @@
 #    (seed 171) at epochs 0, 2001, 2497 and 4001, with their
 #    self-replication scores. The data are saved in
 #    soup_inspector_results/snapshot/seed171_snapshot.npz;
-#  - images/program_tape.pdf and images/interaction_example.pdf: a
-#    self-replicator of epoch 4001 and a program of epoch 0, their tape,
-#    and the result of executing it (from the same data).
+#  - images/program_tape.pdf: a self-replicator of epoch 4001 and a
+#    program of epoch 0 above their tape;
+#  - images/longtape_excerpt.pdf: an excerpt of the long tape of seed 3
+#    (longtape_results/seed3/tape_dumps_seed3);
+#  - images/interaction_example.pdf: the result of executing that tape.
 # The printed output of each script is saved in soup_inspector_results/snapshot/.
 
 source cluster/setup_env.sh
@@ -35,5 +37,6 @@ python3 -u my_scripts/soup_snapshot.py --seed 171 \
 python3 -u my_scripts/plot_program_tape.py \
     --data soup_inspector_results/snapshot/seed171_snapshot.npz \
     --out-tape images/program_tape.pdf \
+    --out-longtape images/longtape_excerpt.pdf \
     --out-interaction images/interaction_example.pdf \
     | tee soup_inspector_results/snapshot/program_tape.log
